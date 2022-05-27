@@ -1,6 +1,6 @@
 # TM Code Challenge Notes
 
-[//]: # ( date: 05/26/22 )
+[//]: # ( date: 05/27/22 )
 
 ## 1. Overview
 
@@ -12,18 +12,22 @@ This document contains (rudimentary) documentation and links for setting up and 
   - [1.1. Table of Contents](#11-table-of-contents)
 - [2. Specification](#2-specification)
 - [3. Folders and Files](#3-folders-and-files)
-- [4. Design](#4-design)
-  - [4.1. SampledStream Web API](#41-sampledstream-web-api)
-  - [4.2. SampledStream Web Application](#42-sampledstream-web-application)
-- [5. Usage](#5-usage)
-- [6. Twitter APIs](#6-twitter-apis)
-  - [6.1. Using Postman to access Twitter APIs](#61-using-postman-to-access-twitter-apis)
-- [7. Development process](#7-development-process)
-  - [7.1. Create the projects](#71-create-the-projects)
-- [8. Next Steps / To Do List](#8-next-steps--to-do-list)
-- [9. References](#9-references)
+- [4. Usage](#4-usage)
+- [5. Next Steps / To Do List](#5-next-steps--to-do-list)
+  - [5.1. To Do before submission](#51-to-do-before-submission)
+  - [5.2. Future Next Steps](#52-future-next-steps)
+- [6. Design diagrams](#6-design-diagrams)
+  - [6.1. Test diagrams to check compatibility](#61-test-diagrams-to-check-compatibility)
+    - [6.1.1. Mermaid](#611-mermaid)
+    - [6.1.2. PlantUML](#612-plantuml)
+  - [6.2. SampledStream Web API](#62-sampledstream-web-api)
+  - [6.3. SampledStream Web Application](#63-sampledstream-web-application)
+- [7. Twitter APIs](#7-twitter-apis)
+  - [7.1. Using Postman to access Twitter APIs](#71-using-postman-to-access-twitter-apis)
+  - [7.2. Run / Debug the solution projects](#72-run--debug-the-solution-projects)
+- [8. References](#8-references)
 
-[//]: # ( spell-checker: ignore choco dockerignore sampledstream )
+[//]: # ( spell-checker: ignore choco dockerignore plantuml sampledstream )
 
 ## 2. Specification
 
@@ -38,6 +42,7 @@ This document contains (rudimentary) documentation and links for setting up and 
 
 | **Folder or File**     | **Description**                                                                  |
 | ---------------------- | -------------------------------------------------------------------------------- |
+| SampledStreamApp       | Folder containing Web app to display data collected from Twitter sampled stream  |
 | SampledStreamCollector | Folder containing Web app to collect data from Twitter sampled stream            |
 | `.dockerignore`        | List of files that Docker should ignore and not package                          |
 | `.gitattributes`       | List of files and Git attributes that Git should use when performing its actions |
@@ -45,12 +50,88 @@ This document contains (rudimentary) documentation and links for setting up and 
 | `README.md`            | This documentation file                                                          |
 | `TMCodeChallenge.sln`  | Main Code Challenge Visual Studio Solution file                                  |
 
-## 4. Design
+## 4. Usage
 
-### 4.1. SampledStream Web API
+- Load solution in Visual Studio
+- Select project SampledStreamCollector
+  - Select `IIS Express` as Build Target
+  - Debug project (`F5`)
+  - Use Swagger to Execute GET call to API
+  - Examine response body
+  - Execute API call repeatedly to see increasing numbers in stats
+- Select project SampledStreamApp
+  - Select `IIS Express` as Build Target
+  - Debug project (`F5`)
+  - View stats
+- Stop debugging (`Shift` `F5`)
+
+## 5. Next Steps / To Do List
+
+### 5.1. To Do before submission
+
+- [x] Create SampleStreamedCollector project from ASP.NET Core Web API template in solution TMCodeChallenge
+  - [x] Replace controller with dummy stream stats controller
+  - [ ] Add Test suite project
+  - [ ] Add strategic exception handling
+  - [ ] Stats for API result
+    - [ ] Tweets per hour and per day
+    - [ ] Tweet queue size
+    - [ ] Return and display extra stats
+  - [ ] Attach to Twitter stream
+    - [ ] Add incoming tweets to concurrent queue
+  - [ ] Launch separate thread to pull incoming tweets from concurrent queue
+    - [ ] Extract hash tags
+    - [ ] Add / update totals
+    - [ ] Add / update top 10 list
+- [x] Create SampleStreamedApp project from ASP.NET Core Web App template in solution TMCodeChallenge
+  - [x] Replace home page with dummy stream stats
+  - [ ] Add Test suite project
+  - [ ] Add strategic exception handling
+  - [ ] Call SampleStreamCollector API to retrieve stats
+  - [ ] Add combo box for number of seconds for page auto-refresh
+- [ ] Create SampleStreamShared project from shared code library template in solution TMCodeChallenge
+- [ ] Documentation
+  - [ ] Usage
+- [ ] Submission email
+  - [ ] Twitter API key
+  - [ ] GitHub URL and authentication
+
+### 5.2. Future Next Steps
+
+| Priority | Category | Description                                                     |
+| :------: | -------- | --------------------------------------------------------------- |
+|    M     | Security | Add OAUTH to secure Swagger UI                                  |
+|    M     | Tooling  | Use gRPC for improving service performance and efficiency       |
+|    M     | Tooling  | Use GraphQL for more advanced APIs                              |
+|    M     | Tooling  | Build a class library for the entity data model for persistence |
+|          |          |                                                                 |
+|          |          |                                                                 |
+|          |          |                                                                 |
+|          |          |                                                                 |
+|          |          |                                                                 |
+
+## 6. Design diagrams
+
+### 6.1. Test diagrams to check compatibility
+
+#### 6.1.1. Mermaid
 
 ```mermaid
-%%{init: {'theme': 'default', "flowchart" : { "diagramPadding": "8", "nodeSpacing": "100", "rankSpacing": "50" } } }%%
+  graph LR;
+      A-->B;
+```
+
+#### 6.1.2. PlantUML
+
+```plantuml
+@startuml
+A -r-> B
+@enduml
+```
+
+### 6.2. SampledStream Web API
+
+```mermaid
 flowchart LR
   A("fa:fa-chrome External Application") <-->|Stats| PA
   B("fa:fa-twitter \nTwitter\nStream API") -->|Stream| CA
@@ -72,7 +153,7 @@ flowchart LR
   end
 ```
 
-### 4.2. SampledStream Web Application
+### 6.3. SampledStream Web Application
 
 ```mermaid
 %%{init: {'theme': 'default', "flowchart" : { "diagramPadding": "8", "nodeSpacing": "100", "rankSpacing": "100" } } }%%
@@ -87,17 +168,7 @@ flowchart LR
   end
 ```
 
-## 5. Usage
-
-- Load solution in Visual Studio
-- Select `IIS Express` as Build Target
-- Debug project SampledStreamCollector (`F5`)
-- Use Swagger to Execute GET call to API
-- Examine response body
-- Execute API call repeatedly to see an increasing total number of tweets
-- Stop debugging
-
-## 6. Twitter APIs
+## 7. Twitter APIs
 
 - [Apply for API access](https://developer.twitter.com/en/apply-for-access)
 
@@ -117,7 +188,7 @@ flowchart LR
   curl -X GET "https://api.twitter.com/2/tweets/sample/stream" -H "Authorization: Bearer ${env:BEARER_TOKEN}"
   ```
 
-### 6.1. Using Postman to access Twitter APIs
+### 7.1. Using Postman to access Twitter APIs
 
 - Install Postman using Chocolatey
   - `choco install postman -y`
@@ -137,27 +208,8 @@ flowchart LR
 - Response body will be empty because Twitter does not fill streams  for Postman
 - Use Code | cURL to view the command, then copy and run it
 
-## 7. Development process
+### 7.2. Run / Debug the solution projects
 
-### 7.1. Create the projects
-
-- Create SampleStreamedCollector project from ASP.NET Core Web API template in solution TMCodeChallenge
-- x
-
-## 8. Next Steps / To Do List
-
-| Priority | Category | Description                                                     |
-| :------: | -------- | --------------------------------------------------------------- |
-|    M     | Security | Add OAUTH to secure Swagger UI                                  |
-|    M     | Tooling  | Use gRPC for improving service performance and efficiency       |
-|    M     | Tooling  | Use GraphQL for more advanced APIs                              |
-|    M     | Tooling  | Build a class library for the entity data model for persistence |
-|          |          |                                                                 |
-|          |          |                                                                 |
-|          |          |                                                                 |
-|          |          |                                                                 |
-|          |          |                                                                 |
-
-## 9. References
+## 8. References
 
 - [Additional Visual Studio Templates](https://dotnetnew.azurewebsites.net/)
