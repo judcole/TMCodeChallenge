@@ -6,8 +6,8 @@ namespace SampledStreamApp.Pages
     public class IndexModel : PageModel
     {
         // Total tweet count
-        private static ulong _totalTweets = 0;
-        public static ulong TotalTweets { get { return _totalTweets; } }
+        private static ulong s_totalTweets = 0;
+        public static ulong TotalTweets { get { return s_totalTweets; } }
 
         // Name of the current day for the heading
         public string? DayName { get; set; }
@@ -33,9 +33,9 @@ namespace SampledStreamApp.Pages
 
             // Set some home page values
             LastUpdated = DateTime.Now.ToString("G");
-            _totalTweets += 2;
+            s_totalTweets += 2;
 
-            _logger.LogInformation("Page get on {DayName} with {TotalTweets} tweets", DayName, _totalTweets);
+            _logger.LogInformation("Page get on {DayName} with {TotalTweets} tweets", DayName, s_totalTweets);
         }
     }
 }

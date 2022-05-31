@@ -8,7 +8,7 @@ namespace SampledStreamCollector.Controllers
     public class SampledStreamController : ControllerBase
     {
         // Total count of all tweets
-        private static ulong TweetCount = 0;
+        private static ulong s_tweetCount = 0;
 
         // Application logger
         private readonly ILogger<SampledStreamController> _logger;
@@ -25,16 +25,16 @@ namespace SampledStreamCollector.Controllers
         public SampledStreamStats Get()
         {
             // Advance the tweet count
-            TweetCount += 5;
+            s_tweetCount += 5;
 
             // Log the call
-            _logger.LogInformation("Returning a tweet count of {TweetCount}", TweetCount);
+            _logger.LogInformation("Returning a tweet count of {s_tweetCount}", s_tweetCount);
 
             // Return the data
             return new SampledStreamStats
             {
                 Date = DateTime.Now,
-                TotalTweets = TweetCount,
+                TotalTweets = s_tweetCount,
                 Status = "Good"
             };
         }
