@@ -8,32 +8,38 @@ using Moq;
 namespace SampledStreamApp.Pages.Tests
 {
     // Class for Index page model tests
-    public class IndexModelTests : IDisposable
+    public class IndexPageTests : IDisposable
     {
-        private readonly ITestOutputHelper testOutputHelper;
-        private readonly IWebDriver webDriver;
+        private readonly IndexPageObject _indexPageObject;
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly IWebDriver _webDriver;
 
         // Construct the tests object
-        public IndexModelTests(ITestOutputHelper testOutputHelper)
+        public IndexPageTests(ITestOutputHelper testOutputHelper)
         {
             // Save the output helper for logging
-            this.testOutputHelper = testOutputHelper;
-            webDriver = new ChromeDriver();
+            this._testOutputHelper = testOutputHelper;
 
             // Log that we are running the tests
             Console.WriteLine("Running tests (console)");
             testOutputHelper.WriteLine("Running tests (helper)");
+
+            // Create Chrome web Driver
+            _webDriver = new ChromeDriver();
+
+            // Create Index Page Object for testing
+            _indexPageObject = new IndexPageObject(_webDriver);
         }
 
         // Dispoase of the tests object
         public void Dispose()
         {
             // Log that we are shutting down
-            testOutputHelper.WriteLine("Disposing IndexModelTests");
+            _testOutputHelper.WriteLine("Disposing IndexModelTests");
 
             // Close and free up the Web driver
-            webDriver.Quit();
-            webDriver.Dispose();
+            _webDriver.Quit();
+            _webDriver.Dispose();
             GC.SuppressFinalize(this);
         }
 
@@ -41,29 +47,27 @@ namespace SampledStreamApp.Pages.Tests
         [Fact()]
         public void IndexPageTest()
         {
-            testOutputHelper.WriteLine("Starting IndexPageTest");
+            _testOutputHelper.WriteLine("Starting IndexPageTest");
 
             // Navigate to the index page
-            webDriver.Navigate().GoToUrl("https://localhost:44324/");
+            _indexPageObject.ResetIndexPage();
 
             // Check the last updated date and time
-            var lastUpdated = webDriver.FindElement(By.Id("last-updated"));
-            var lastUpdatedValue = lastUpdated.Text[..10];
+            var lastUpdatedValue = _indexPageObject.LastUpdated.Text[..10];
             lastUpdatedValue.Should().Be(DateTime.Now.AddSeconds(-1).ToString("G")[..10]);
 
             // Check the total tweets count
-            var totalTweets = webDriver.FindElement(By.Id("total-tweets"));
-            var totalTweetsValue = totalTweets.Text;
+            var totalTweetsValue = _indexPageObject.TotalTweets.Text;
             totalTweetsValue.Should().Be("4");
 
-            testOutputHelper.WriteLine("Ending IndexPageTest");
+            _testOutputHelper.WriteLine("Ending IndexPageTest");
         }
 
-        // Test the 
+        // Test the IndexPage OnGet method
         [Fact()]
-        public void TestIndexModelOnGet()
+        public void IndexModelOnGetTest()
         {
-            testOutputHelper.WriteLine("Starting IndexModel.OnGet Test");
+            _testOutputHelper.WriteLine("Starting IndexModel.OnGet Test");
 
             var mockLogger = new Mock<ILogger<IndexModel>>();
             var indexModel = new IndexModel(mockLogger.Object);
@@ -80,7 +84,7 @@ namespace SampledStreamApp.Pages.Tests
             indexModel.DayName.Should().Be(DateTime.Now.ToString("dddd"));
             indexModel.LastUpdated.Should().Be(DateTime.Now.ToString("G"));
 
-            testOutputHelper.WriteLine("Ending IndexModel.OnGet Test");
+            _testOutputHelper.WriteLine("Ending IndexModel.OnGet Test");
         }
     }
 }
