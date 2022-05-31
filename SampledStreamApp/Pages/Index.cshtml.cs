@@ -49,7 +49,6 @@ namespace SampledStreamApp.Pages
             _logger.LogInformation("Page get on {DayName} with {TotalTweets} tweets", DayName, s_stats.TotalTweets);
 
             // Set some home page values just for now
-            s_stats.LastUpdated = DateTime.Now;
             s_stats.DailyTweets += 2;
             s_stats.HourlyTweets += 3;
             s_stats.TotalTweets += 4;

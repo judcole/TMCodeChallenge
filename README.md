@@ -1,6 +1,6 @@
 # TM Code Challenge Notes
 
-[//]: # ( date: 05/30/22 )
+[//]: # ( date: 05/31/22 )
 
 ## 1. Overview
 
@@ -83,10 +83,10 @@ This document contains (rudimentary) documentation and links for setting up and 
 
 - [x] Create SampleStreamedCollector project from ASP.NET Core Web API template in solution TMCodeChallenge
   - [x] Replace controller with dummy stream stats controller
-  - [ ] Add Test suite project and basic tests
+  - [x] Add Test suite project and basic tests
   - [ ] Add strategic exception handling and tests
   - [x] Stats for API result to use shared class
-    - [ ] Return extra stats
+    - [x] Return extra stats
   - [ ] Attach to Twitter stream
     - [ ] Add incoming tweets to concurrent queue
   - [ ] Launch separate thread to pull incoming tweets from concurrent queue

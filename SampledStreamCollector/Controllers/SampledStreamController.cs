@@ -3,7 +3,9 @@ using SampledStreamCommon;
 
 namespace SampledStreamCollector.Controllers
 {
-    // Class for the controller to get the latest statistics
+    /// <summary>
+    /// Class for the controller to get the latest statistics
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class SampledStreamController : ControllerBase
@@ -14,14 +16,20 @@ namespace SampledStreamCollector.Controllers
         // Application logger
         private readonly ILogger<SampledStreamController> _logger;
 
-        // Construct the controller object
+        /// <summary>
+        /// Construct the controller object
+        /// </summary>
+        /// <param name="logger"></param>
         public SampledStreamController(ILogger<SampledStreamController> logger)
         {
             // Save the application logger
             _logger = logger;
         }
 
-        // Get the latest statistics
+        /// <summary>
+        /// Get the latest statistics
+        /// </summary>
+        /// <returns>Statistics object containing the latest stats</returns>
         [HttpGet(Name = "GetSampledStreamStats")]
         public SampledStreamStats Get()
         {
@@ -34,9 +42,8 @@ namespace SampledStreamCollector.Controllers
             // Return the data
             return new SampledStreamStats
             {
-                LastUpdated = DateTime.Now,
-                TotalTweets = s_tweetCount,
-                Status = "Good"
+                Status = "Good",
+                TotalTweets = s_tweetCount
             };
         }
     }

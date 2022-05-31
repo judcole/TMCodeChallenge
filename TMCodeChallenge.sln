@@ -12,7 +12,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampledStreamApp", "Sampled
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampledStreamAppTests", "SampledStreamAppTests\SampledStreamAppTests.csproj", "{52135440-0547-42CB-990A-0470CAA8E145}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampledStreamCommon", "SampledStreamCommon\SampledStreamCommon.csproj", "{8EAE27ED-99CC-4956-BC57-F763EF76DFB2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampledStreamCommon", "SampledStreamCommon\SampledStreamCommon.csproj", "{8EAE27ED-99CC-4956-BC57-F763EF76DFB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampledStreamCollectorTests", "SampledStreamCollectorTests\SampledStreamCollectorTests.csproj", "{B5EFA30D-1D5C-4BCF-8541-AE676D1B9C74}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +38,10 @@ Global
 		{8EAE27ED-99CC-4956-BC57-F763EF76DFB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8EAE27ED-99CC-4956-BC57-F763EF76DFB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8EAE27ED-99CC-4956-BC57-F763EF76DFB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5EFA30D-1D5C-4BCF-8541-AE676D1B9C74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5EFA30D-1D5C-4BCF-8541-AE676D1B9C74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5EFA30D-1D5C-4BCF-8541-AE676D1B9C74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5EFA30D-1D5C-4BCF-8541-AE676D1B9C74}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

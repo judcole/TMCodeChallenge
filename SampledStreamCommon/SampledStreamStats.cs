@@ -1,6 +1,8 @@
 namespace SampledStreamCommon
 {
-    // Class to store statistics for the sampled stream
+    /// <summary>
+    /// Class to store statistics for the sampled stream
+    /// </summary>
     public class SampledStreamStats
     {
         // Size of the list for the top Hashtags
@@ -29,5 +31,14 @@ namespace SampledStreamCommon
 
         // Number of Tweets waiting to be processed in incoming queue
         public ulong TweetQueueCount { get; set; }
+
+        /// <summary>
+        /// Construct the SampledStreamStats object
+        /// </summary>
+        public SampledStreamStats()
+        {
+            // Default to the current UTC date and time
+            LastUpdated = DateTime.UtcNow;
+        }
     }
 }

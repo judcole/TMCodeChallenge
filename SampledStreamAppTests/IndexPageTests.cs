@@ -1,20 +1,25 @@
-﻿using Xunit.Abstractions;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium;
+using Xunit.Abstractions;
 
 namespace SampledStreamApp.Pages.Tests
 {
-    // Class for Index page model tests
+    /// <summary>
+    /// Class for Index page model tests
+    /// </summary>
     public class IndexPageTests : IDisposable
     {
         private readonly IndexPageObject _indexPageObject;
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly IWebDriver _webDriver;
 
-        // Construct the tests object
+        /// <summary>
+        /// Construct the tests object
+        /// </summary>
+        /// <param name="testOutputHelper"></param>
         public IndexPageTests(ITestOutputHelper testOutputHelper)
         {
             // Save the output helper for logging
@@ -31,7 +36,9 @@ namespace SampledStreamApp.Pages.Tests
             _indexPageObject = new IndexPageObject(_webDriver);
         }
 
-        // Dispoase of the tests object
+        /// <summary>
+        /// Dispose of the tests object
+        /// </summary>
         public void Dispose()
         {
             // Log that we are shutting down
@@ -43,7 +50,9 @@ namespace SampledStreamApp.Pages.Tests
             GC.SuppressFinalize(this);
         }
 
-        // Test the IndexModel OnGet method
+        /// <summary>
+        /// Test the IndexModel OnGet method
+        /// </summary>
         [Fact()]
         public void IndexModelOnGetTest()
         {
@@ -55,19 +64,24 @@ namespace SampledStreamApp.Pages.Tests
             // Check the initial model state
             indexModel.Should().NotBeNull();
             indexModel.DayName.Should().Be(null);
-            indexModel.LastUpdated.Should().Be("1/1/0001 12:00:00 AM");
+            indexModel.LastUpdated[..10].Should().Be(DateTime.UtcNow.AddSeconds(-1).ToString("G")[..10]);
 
             // Call the method
             indexModel.OnGet();
 
             // Check the model state
             indexModel.DayName.Should().Be(DateTime.Now.ToString("dddd"));
-            indexModel.LastUpdated.Should().Be(DateTime.Now.ToString("G"));
+            indexModel.LastUpdated[..10].Should().Be(DateTime.UtcNow.AddSeconds(-1).ToString("G")[..10]);
+            indexModel.DailyTweets.Should().BeGreaterThan(0);
+            indexModel.HourlyTweets.Should().BeGreaterThan(0);
+            indexModel.TotalTweets.Should().BeGreaterThan(0);
 
             _testOutputHelper.WriteLine("Ending IndexModel.OnGet Test");
         }
 
-        // Test the rendered Index Page in the browser
+        /// <summary>
+        /// Test the rendered Index Page in the browser
+        /// </summary>
         [Fact()]
         public void IndexPageTest()
         {
@@ -78,7 +92,7 @@ namespace SampledStreamApp.Pages.Tests
 
             // Check the last updated date and time
             var lastUpdatedValue = _indexPageObject.LastUpdated.Text[..10];
-            lastUpdatedValue.Should().Be(DateTime.Now.AddSeconds(-1).ToString("G")[..10]);
+            lastUpdatedValue.Should().Be(DateTime.UtcNow.AddSeconds(-1).ToString("G")[..10]);
 
             // Check the total tweets count
             var totalTweetsValue = _indexPageObject.TotalTweets.Text;
