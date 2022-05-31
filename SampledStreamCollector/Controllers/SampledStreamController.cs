@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SampledStreamCommon;
 
 namespace SampledStreamCollector.Controllers
 {
@@ -33,7 +34,7 @@ namespace SampledStreamCollector.Controllers
             // Return the data
             return new SampledStreamStats
             {
-                Date = DateTime.Now,
+                LastUpdated = DateTime.Now,
                 TotalTweets = s_tweetCount,
                 Status = "Good"
             };
