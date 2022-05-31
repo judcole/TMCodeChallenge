@@ -1,6 +1,11 @@
 ﻿@page
 @model IndexModel
 
+@{
+	// Set up some page values
+	ViewData["Title"] = "Twitter SampledStream Application";
+}
+
 <style>
 	p {
 		height: 100px;
@@ -38,11 +43,11 @@
 				</tr>
 				<tr>
 					<td>Last updated</td>
-					<td>@Model.LastUpdated</td>
+					<td id="last-updated">@Model.LastUpdated</td>
 				</tr>
 				<tr>
 					<td>Total tweets</td>
-					<td>@IndexModel.TotalTweets</td>
+					<td id="total-tweets">@IndexModel.TotalTweets</td>
 				</tr>
 			</table>
 		</div>
