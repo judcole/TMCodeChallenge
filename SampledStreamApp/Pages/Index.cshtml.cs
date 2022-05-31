@@ -1,36 +1,37 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace SampledStreamApp.Pages
 {
+    // Class for Index page data model
     public class IndexModel : PageModel
     {
-        // Tweet count
+        // Total tweet count
         private static ulong _totalTweets = 0;
         public static ulong TotalTweets { get { return _totalTweets; } }
 
         // Name of the current day for the heading
         public string? DayName { get; set; }
 
+        // Date and time of the last stats update
         public string? LastUpdated;
 
         // Application logger
         private readonly ILogger<IndexModel> _logger;
 
+        // Construct the model object
         public IndexModel(ILogger<IndexModel> logger)
         {
             // Save the application logger
             _logger = logger;
-
-            // Set some home page values
         }
 
+        // Construct the page on a GET action
         public void OnGet()
         {
-            ViewData["Title"] = "Twitter SampledStream Application";
             // Get the name of the current day for the heading
             DayName = DateTime.Now.ToString("dddd");
 
+            // Set some home page values
             LastUpdated = DateTime.Now.ToString("G");
             _totalTweets += 2;
 
@@ -38,4 +39,3 @@ namespace SampledStreamApp.Pages
         }
     }
 }
-// Readonly vars

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SampledStreamCollector.Controllers
 {
+    // Class for the controller to get the latest statistics
     [ApiController]
     [Route("[controller]")]
     public class SampledStreamController : ControllerBase
@@ -12,11 +13,14 @@ namespace SampledStreamCollector.Controllers
         // Application logger
         private readonly ILogger<SampledStreamController> _logger;
 
+        // Construct the controller object
         public SampledStreamController(ILogger<SampledStreamController> logger)
         {
+            // Save the application logger
             _logger = logger;
         }
 
+        // Get the latest statistics
         [HttpGet(Name = "GetSampledStreamStats")]
         public SampledStreamStats Get()
         {
