@@ -12,13 +12,15 @@ This document contains (rudimentary) documentation and links for setting up and 
   - [1.1. Table of Contents](#11-table-of-contents)
 - [2. Specification](#2-specification)
 - [3. Folders and Files](#3-folders-and-files)
-- [4. Usage](#4-usage)
+- [4. Usage and Testing](#4-usage-and-testing)
+  - [4.1. Automated Unit Tests](#41-automated-unit-tests)
+  - [4.2. Manual Tests](#42-manual-tests)
 - [5. Next Steps / To Do List](#5-next-steps--to-do-list)
   - [5.1. To Do before submission](#51-to-do-before-submission)
   - [5.2. Future Next Steps](#52-future-next-steps)
 - [6. Design diagrams](#6-design-diagrams)
-  - [6.2. SampledStream Web API](#62-sampledstream-web-api)
-  - [6.3. SampledStream Web Application](#63-sampledstream-web-application)
+  - [6.1. SampledStream Web API](#61-sampledstream-web-api)
+  - [6.2. SampledStream Web Application](#62-sampledstream-web-application)
 - [7. Twitter APIs](#7-twitter-apis)
   - [7.1. Using Postman to access Twitter APIs](#71-using-postman-to-access-twitter-apis)
   - [7.2. Run / Debug the solution projects](#72-run--debug-the-solution-projects)
@@ -47,17 +49,30 @@ This document contains (rudimentary) documentation and links for setting up and 
 | `README.md`            | This documentation file                                                          |
 | `TMCodeChallenge.sln`  | Main Code Challenge Visual Studio Solution file                                  |
 
-## 4. Usage
+## 4. Usage and Testing
+
+### 4.1. Automated Unit Tests
+
+- Load solution in Visual Studio
+- Select project SampledStreamApp
+  - Note that all browser Unit Tests are currently hard coded to use Chrome (see To Do List)
+  - Select `IIS Express` as Build Target on drop down (could also select `Docker` if you have Docker Desktop and WSL installed)
+  - Start project without Debugging (`Ctrl+F5`) to show default Web page on localhost
+  - Run all automated tests (`Ctrl+R, A`) or open from Test Explorer (`Ctrl+E, T`)
+
+### 4.2. Manual Tests
 
 - Load solution in Visual Studio
 - Select project SampledStreamCollector
-  - Select `IIS Express` as Build Target
+  - Select `IIS Express` as Build Target on drop down (could also select `Docker` if you have Docker Desktop and WSL installed)
+  - Select preferred Web Browser using Build Target drop down
   - Debug project (`F5`)
   - Use Swagger to Execute GET call to API
   - Examine response body
   - Execute API call repeatedly to see increasing numbers in stats
 - Select project SampledStreamApp
-  - Select `IIS Express` as Build Target
+  - Select `IIS Express` as Build Target (could also select `Docker` if you have Docker Desktop and WSL installed)
+  - Select preferred Web Browser using Build Target drop down
   - Debug project (`F5`)
   - View stats
 - Stop debugging (`Shift` `F5`)
@@ -70,8 +85,8 @@ This document contains (rudimentary) documentation and links for setting up and 
   - [x] Replace controller with dummy stream stats controller
   - [ ] Add Test suite project and basic tests
   - [ ] Add strategic exception handling and tests
-  - [ ] Stats for API result to use shared class
-    - [ ] Return and display extra stats
+  - [x] Stats for API result to use shared class
+    - [ ] Return extra stats
   - [ ] Attach to Twitter stream
     - [ ] Add incoming tweets to concurrent queue
   - [ ] Launch separate thread to pull incoming tweets from concurrent queue
@@ -81,18 +96,19 @@ This document contains (rudimentary) documentation and links for setting up and 
 - [x] Create SampleStreamedApp project from ASP.NET Core Web App template in solution TMCodeChallenge
   - [x] Replace home page with dummy stream stats
   - [x] Add Test suite project and basic tests
+  - [x] Add Index Page Object to simplify testing
   - [ ] Add strategic exception handling and tests
-  - [ ] Stats for API result to use shared class
+  - [x] Stats for API result to use shared class
   - [ ] Call SampleStreamCollector API to retrieve stats
   - [ ] Add combo box for number of seconds for auto-refresh of stats
-- [ ] Create SampleStreamShared project from shared code library template in solution TMCodeChallenge
-  - [ ] Shared stats class for API result
-    - [ ] Total tweets
-    - [ ] Tweets per hour and per day
-    - [ ] Tweet queue size
-    - [ ] Top 10 tags and counts
-- [ ] Documentation
-  - [ ] Usage
+- [x] Create SampleStreamShared project from shared code library template in solution TMCodeChallenge
+  - [x] Shared stats class for API result
+    - [x] Total tweets
+    - [x] Tweets per hour and per day
+    - [x] Tweet queue count
+    - [x] Top 10 tags and counts
+- [x] Documentation
+  - [x] Usage and testing
 - [ ] Submission email
   - [ ] Twitter API key
   - [ ] GitHub URL and authentication
@@ -108,12 +124,12 @@ This document contains (rudimentary) documentation and links for setting up and 
 |    L     | Tooling  | Minimize size of Docker containers by removing unneeded apps and tools          |
 |    M     | Tooling  | Create deployment automation script / Docker compose file for Docker containers |
 |    M     | Tests    | Finish setting up unit tests to run in parallel                                 |
-|          |          |                                                                                 |
+|    H     | Tests    | Enhance to also run tests in FireFox and Edge                                   |
 |          |          |                                                                                 |
 
 ## 6. Design diagrams
 
-### 6.2. SampledStream Web API
+### 6.1. SampledStream Web API
 
 ```mermaid
 flowchart LR
@@ -137,7 +153,7 @@ flowchart LR
   end
 ```
 
-### 6.3. SampledStream Web Application
+### 6.2. SampledStream Web Application
 
 ```mermaid
 %%{init: {'theme': 'default', "flowchart" : { "diagramPadding": "8", "nodeSpacing": "100", "rankSpacing": "100" } } }%%

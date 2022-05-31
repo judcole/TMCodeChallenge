@@ -2,13 +2,13 @@
 @model IndexModel
 
 @{
-	// Set up some page values
+	// Set up some page element values
 	ViewData["Title"] = "Twitter SampledStream Application";
 }
 
 <style>
 	p {
-		height: 100px;
+		height: 50px;
 	}
 
 	table {
@@ -32,9 +32,7 @@
 
 	<div class="text-center">
 		<h2 class="display-4">Welcome to our Twitter SampledStream Application on this fine @Model.DayName</h2>
-
 		<p />
-
 		<div class="container col-6">
 			<table>
 				<tr>
@@ -47,11 +45,34 @@
 				</tr>
 				<tr>
 					<td>Total tweets</td>
-					<td id="total-tweets">@IndexModel.TotalTweets</td>
+					<td id="total-tweets">@Model.TotalTweets</td>
+				</tr>
+				<tr>
+					<td>Daily tweets</td>
+					<td id="daily-tweets">@Model.DailyTweets</td>
+				</tr>
+				<tr>
+					<td>Hourly tweets</td>
+					<td id="hourly-tweets">@Model.HourlyTweets</td>
 				</tr>
 			</table>
+			<p />
+			<table>
+				<tr>
+					<th>Hashtag rank</th>
+					<th>Hashtag</th>
+					<th>Usage count</th>
+				</tr>
+				@for (int i = 0; i < @SampledStreamCommon.SampledStreamStats.TopHashtagsSize; i++)
+				{
+				<tr>
+					<td>@(i+1)</td>
+					<td id="hashtag-@i">@Model.TopHashtags(i)</td>
+					<td id="hashtag-count-@i">@Model.TopHashtagCounts(i)</td>
+				</tr>
+				}
+			</table>
 		</div>
-
 		<p />
 		<hr />
 		<p>Learn more about <a href="https://www.judcole.com">Jud Cole</a>.</p>

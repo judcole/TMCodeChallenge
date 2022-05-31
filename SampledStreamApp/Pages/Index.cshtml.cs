@@ -1,19 +1,34 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using SampledStreamCommon;
 
 namespace SampledStreamApp.Pages
 {
     // Class for Index page data model
     public class IndexModel : PageModel
     {
-        // Total tweet count
-        private static ulong s_totalTweets = 0;
-        public static ulong TotalTweets { get { return s_totalTweets; } }
+        // Shared statistics object
+        private static readonly SampledStreamStats s_stats = new();
+
+        // Average daily number of tweets received
+        public ulong DailyTweets { get { return s_stats.DailyTweets; } }
 
         // Name of the current day for the heading
         public string? DayName { get; set; }
 
+        // Average hourly number of tweets received
+        public ulong HourlyTweets { get { return s_stats.HourlyTweets; } }
+
         // Date and time of the last stats update
-        public string? LastUpdated;
+        public string LastUpdated { get { return s_stats.LastUpdated.ToString("G"); } }
+
+        // Top Hashtags
+        public ulong TopHashtagCounts (int index) { return s_stats.TopHashtagCounts[index]; }
+
+        // Top Hashtags
+        public string TopHashtags(int index) { return s_stats.TopHashtags[index]; }
+
+        // Total tweet count
+        public ulong TotalTweets { get { return s_stats.TotalTweets; } }
 
         // Application logger
         private readonly ILogger<IndexModel> _logger;
@@ -31,11 +46,13 @@ namespace SampledStreamApp.Pages
             // Get the name of the current day for the heading
             DayName = DateTime.Now.ToString("dddd");
 
-            // Set some home page values
-            LastUpdated = DateTime.Now.ToString("G");
-            s_totalTweets += 2;
+            _logger.LogInformation("Page get on {DayName} with {TotalTweets} tweets", DayName, s_stats.TotalTweets);
 
-            _logger.LogInformation("Page get on {DayName} with {TotalTweets} tweets", DayName, s_totalTweets);
+            // Set some home page values just for now
+            s_stats.LastUpdated = DateTime.Now;
+            s_stats.DailyTweets += 2;
+            s_stats.HourlyTweets += 3;
+            s_stats.TotalTweets += 4;
         }
     }
 }
