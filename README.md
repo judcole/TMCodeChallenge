@@ -1,6 +1,6 @@
 # TM Code Challenge Notes
 
-[//]: # ( date: 05/27/22 )
+[//]: # ( date: 05/30/22 )
 
 ## 1. Overview
 
@@ -17,9 +17,6 @@ This document contains (rudimentary) documentation and links for setting up and 
   - [5.1. To Do before submission](#51-to-do-before-submission)
   - [5.2. Future Next Steps](#52-future-next-steps)
 - [6. Design diagrams](#6-design-diagrams)
-  - [6.1. Test diagrams to check compatibility](#61-test-diagrams-to-check-compatibility)
-    - [6.1.1. Mermaid](#611-mermaid)
-    - [6.1.2. PlantUML](#612-plantuml)
   - [6.2. SampledStream Web API](#62-sampledstream-web-api)
   - [6.3. SampledStream Web Application](#63-sampledstream-web-application)
 - [7. Twitter APIs](#7-twitter-apis)
@@ -71,25 +68,29 @@ This document contains (rudimentary) documentation and links for setting up and 
 
 - [x] Create SampleStreamedCollector project from ASP.NET Core Web API template in solution TMCodeChallenge
   - [x] Replace controller with dummy stream stats controller
-  - [ ] Add Test suite project
-  - [ ] Add strategic exception handling
-  - [ ] Stats for API result
-    - [ ] Tweets per hour and per day
-    - [ ] Tweet queue size
+  - [ ] Add Test suite project and basic tests
+  - [ ] Add strategic exception handling and tests
+  - [ ] Stats for API result to use shared class
     - [ ] Return and display extra stats
   - [ ] Attach to Twitter stream
     - [ ] Add incoming tweets to concurrent queue
   - [ ] Launch separate thread to pull incoming tweets from concurrent queue
     - [ ] Extract hash tags
     - [ ] Add / update totals
-    - [ ] Add / update top 10 list
+    - [ ] Add / update top 10 tag list
 - [x] Create SampleStreamedApp project from ASP.NET Core Web App template in solution TMCodeChallenge
   - [x] Replace home page with dummy stream stats
-  - [ ] Add Test suite project
-  - [ ] Add strategic exception handling
+  - [x] Add Test suite project and basic tests
+  - [ ] Add strategic exception handling and tests
+  - [ ] Stats for API result to use shared class
   - [ ] Call SampleStreamCollector API to retrieve stats
-  - [ ] Add combo box for number of seconds for page auto-refresh
+  - [ ] Add combo box for number of seconds for auto-refresh of stats
 - [ ] Create SampleStreamShared project from shared code library template in solution TMCodeChallenge
+  - [ ] Shared stats class for API result
+    - [ ] Total tweets
+    - [ ] Tweets per hour and per day
+    - [ ] Tweet queue size
+    - [ ] Top 10 tags and counts
 - [ ] Documentation
   - [ ] Usage
 - [ ] Submission email
@@ -98,36 +99,19 @@ This document contains (rudimentary) documentation and links for setting up and 
 
 ### 5.2. Future Next Steps
 
-| Priority | Category | Description                                                     |
-| :------: | -------- | --------------------------------------------------------------- |
-|    M     | Security | Add OAUTH to secure Swagger UI                                  |
-|    M     | Tooling  | Use gRPC for improving service performance and efficiency       |
-|    M     | Tooling  | Use GraphQL for more advanced APIs                              |
-|    M     | Tooling  | Build a class library for the entity data model for persistence |
-|          |          |                                                                 |
-|          |          |                                                                 |
-|          |          |                                                                 |
-|          |          |                                                                 |
-|          |          |                                                                 |
+| Priority | Category | Description                                                                     |
+| :------: | -------- | ------------------------------------------------------------------------------- |
+|    M     | Security | Add OAUTH to secure Swagger UI                                                  |
+|    M     | Tooling  | Use gRPC for improving service performance and efficiency                       |
+|    M     | Tooling  | Use GraphQL for more advanced APIs                                              |
+|    M     | Tooling  | Build a class library for the entity data model for persistence                 |
+|    L     | Tooling  | Minimize size of Docker containers by removing unneeded apps and tools          |
+|    M     | Tooling  | Create deployment automation script / Docker compose file for Docker containers |
+|    M     | Tests    | Finish setting up unit tests to run in parallel                                 |
+|          |          |                                                                                 |
+|          |          |                                                                                 |
 
 ## 6. Design diagrams
-
-### 6.1. Test diagrams to check compatibility
-
-#### 6.1.1. Mermaid
-
-```mermaid
-  graph LR;
-      A-->B;
-```
-
-#### 6.1.2. PlantUML
-
-```plantuml
-@startuml
-A -r-> B
-@enduml
-```
 
 ### 6.2. SampledStream Web API
 
