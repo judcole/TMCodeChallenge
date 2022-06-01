@@ -17,13 +17,13 @@ namespace SampledStreamCollectorTests
         }
 
         /// <summary>
-        /// Test the creation of a new SampledStreamStats object
+        /// Test that the creation of a new SampledStreamStats object is successful
         /// </summary>
         [Fact()]
-        public void SampledStreamStatsNewTest()
+        public void SampledStreamStats_Create_ReturnInstance()
         {
-            // Create an object
-            var newStats = new SampledStreamStats();
+            // Create an instance
+            var newStats = CreateStatsInstance();
 
             // Check the default values
             newStats.Should().NotBeNull();
@@ -39,6 +39,15 @@ namespace SampledStreamCollectorTests
             }
             newStats.TotalTweets.Should().Be(0);
             newStats.TweetQueueCount.Should().Be(0);
+        }
+
+        /// <summary>
+        /// Create an instance of the SampledStreamStats class
+        /// </summary>
+        /// <returns>The new instance</returns>
+        private static SampledStreamStats CreateStatsInstance()
+        {
+            return new SampledStreamStats();
         }
     }
 }

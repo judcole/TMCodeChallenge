@@ -13,7 +13,7 @@ namespace SampledStreamCollector.Controllers.Tests
         private readonly ITestOutputHelper _testOutputHelper;
 
         /// <summary>
-        /// Construct the tests object
+        /// Construct the tests instance
         /// </summary>
         /// <param name="testOutputHelper">Where to send the test output</param>
         public SampledStreamControllerTests(ITestOutputHelper testOutputHelper)
@@ -23,32 +23,32 @@ namespace SampledStreamCollector.Controllers.Tests
         }
 
         /// <summary>
-        /// Test the creation of a new controller
+        /// Test that the creation of a new controller is successful
         /// </summary>
         [Fact()]
-        public void SampledStreamControllerTest()
+        public void SampledStreamController_Create_ReturnInstance()
         {
-            _testOutputHelper.WriteLine("Starting SampledStreamController Test");
+            _testOutputHelper.WriteLine("SampledStreamController_Create_ReturnInstance");
 
-            var mockLogger = new Mock<ILogger<SampledStreamController>>();
-            var newController = new SampledStreamController(mockLogger.Object);
+            // Create an instance
+            var newController = CreateControllerInstance();
 
             // Check the initial controller state
             newController.Should().NotBeNull();
 
-            _testOutputHelper.WriteLine("Ending SampledStreamController Test");
+            _testOutputHelper.WriteLine("Ending SampledStreamController_Create_ReturnInstance");
         }
 
         /// <summary>
-        /// Test the SampledStreamController Get method
+        /// Test that the SampledStreamController Get method returns valid statistics
         /// </summary>
         [Fact()]
-        public void GetTest()
+        public void SampledStreamController_Get_ReturnStats()
         {
-            _testOutputHelper.WriteLine("Starting SampledStreamController Get Test");
+            _testOutputHelper.WriteLine("Starting SampledStreamController_Get_ReturnStats");
 
-            var mockLogger = new Mock<ILogger<SampledStreamController>>();
-            var newController = new SampledStreamController(mockLogger.Object);
+            // Create an instance
+            var newController = CreateControllerInstance();
 
             // Call the Get method
             var stats = newController.Get();
@@ -58,7 +58,17 @@ namespace SampledStreamCollector.Controllers.Tests
             stats.TotalTweets.Should().BeGreaterThan(0);
             stats.Status.Should().Be("Good");
 
-            _testOutputHelper.WriteLine("Ending SampledStreamController Get Test");
+            _testOutputHelper.WriteLine("Ending SampledStreamController_Get_ReturnStats");
+        }
+
+        /// <summary>
+        /// Create an instance of the SampledStreamController class
+        /// </summary>
+        /// <returns></returns>
+        private static SampledStreamController CreateControllerInstance()
+        {
+            var mockLogger = new Mock<ILogger<SampledStreamController>>();
+            return new SampledStreamController(mockLogger.Object);
         }
     }
 }

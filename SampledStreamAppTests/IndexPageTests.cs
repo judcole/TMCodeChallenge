@@ -17,7 +17,7 @@ namespace SampledStreamApp.Pages.Tests
         private readonly IWebDriver _webDriver;
 
         /// <summary>
-        /// Construct the tests object
+        /// Construct the tests instance
         /// </summary>
         /// <param name="testOutputHelper"></param>
         public IndexPageTests(ITestOutputHelper testOutputHelper)
@@ -37,7 +37,7 @@ namespace SampledStreamApp.Pages.Tests
         }
 
         /// <summary>
-        /// Dispose of the tests object
+        /// Dispose of the tests instance
         /// </summary>
         public void Dispose()
         {
@@ -51,12 +51,12 @@ namespace SampledStreamApp.Pages.Tests
         }
 
         /// <summary>
-        /// Test the IndexModel OnGet method
+        /// Test that the IndexModel OnGet method returns valid statistics
         /// </summary>
         [Fact()]
-        public void IndexModelOnGetTest()
+        public void IndexModelOnGet_Request_ReturnStats()
         {
-            _testOutputHelper.WriteLine("Starting IndexModel.OnGet Test");
+            _testOutputHelper.WriteLine("Starting IndexModelOnGet_Request_ReturnStats");
 
             var mockLogger = new Mock<ILogger<IndexModel>>();
             var indexModel = new IndexModel(mockLogger.Object);
@@ -76,16 +76,16 @@ namespace SampledStreamApp.Pages.Tests
             indexModel.HourlyTweets.Should().BeGreaterThan(0);
             indexModel.TotalTweets.Should().BeGreaterThan(0);
 
-            _testOutputHelper.WriteLine("Ending IndexModel.OnGet Test");
+            _testOutputHelper.WriteLine("IndexModelOnGet_Request_ReturnStats");
         }
 
         /// <summary>
-        /// Test the rendered Index Page in the browser
+        /// Test that the Index Page is properly rendered in the browser
         /// </summary>
         [Fact()]
-        public void IndexPageTest()
+        public void IndexPage_Get_RenderPage()
         {
-            _testOutputHelper.WriteLine("Starting IndexPageTest");
+            _testOutputHelper.WriteLine("Starting IndexPage_Get_RenderPage");
 
             // Navigate to the index page
             _indexPageObject.ResetIndexPage();
@@ -122,7 +122,7 @@ namespace SampledStreamApp.Pages.Tests
             var topHashtag2CountValue = _indexPageObject.TopHashtagCount2.Text;
             Int32.Parse(topHashtag2CountValue).Should().Be(0);
 
-            _testOutputHelper.WriteLine("Ending IndexPageTest");
+            _testOutputHelper.WriteLine("Ending IndexPage_Get_RenderPage");
         }
     }
 }

@@ -33,7 +33,7 @@ namespace SampledStreamCommon
         public ulong TweetQueueCount { get; set; }
 
         /// <summary>
-        /// Construct the SampledStreamStats object
+        /// Construct the SampledStreamStats instance
         /// </summary>
         public SampledStreamStats()
         {
