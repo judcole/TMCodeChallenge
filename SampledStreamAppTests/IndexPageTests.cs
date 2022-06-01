@@ -59,19 +59,22 @@ namespace SampledStreamApp.Pages.Tests
             _testOutputHelper.WriteLine("Starting IndexModelOnGet_Request_ReturnStats");
 
             var mockLogger = new Mock<ILogger<IndexModel>>();
+            var expectedLastUpdated = DateTime.UtcNow;
             var indexModel = new IndexModel(mockLogger.Object);
 
             // Check the initial model state
             indexModel.Should().NotBeNull();
             indexModel.DayName.Should().Be(null);
-            indexModel.LastUpdated[..10].Should().Be(DateTime.UtcNow.AddSeconds(-1).ToString("G")[..10]);
+            var dateDifference = indexModel.LastUpdated.Subtract(expectedLastUpdated);
+            dateDifference.TotalSeconds.Should().BeInRange(0, 30);
 
             // Call the method
             indexModel.OnGet();
 
             // Check the model state
             indexModel.DayName.Should().Be(DateTime.Now.ToString("dddd"));
-            indexModel.LastUpdated[..10].Should().Be(DateTime.UtcNow.AddSeconds(-1).ToString("G")[..10]);
+            dateDifference = indexModel.LastUpdated.Subtract(expectedLastUpdated);
+            dateDifference.TotalSeconds.Should().BeInRange(0, 30);
             indexModel.DailyTweets.Should().BeGreaterThan(0);
             indexModel.HourlyTweets.Should().BeGreaterThan(0);
             indexModel.TotalTweets.Should().BeGreaterThan(0);
@@ -87,12 +90,20 @@ namespace SampledStreamApp.Pages.Tests
         {
             _testOutputHelper.WriteLine("Starting IndexPage_Get_RenderPage");
 
+            var expectedLastUpdated = DateTime.UtcNow;
+
             // Navigate to the index page
             _indexPageObject.ResetIndexPage();
 
-            // Check the last updated date and time
-            var lastUpdatedValue = _indexPageObject.LastUpdated.Text[..10];
-            lastUpdatedValue.Should().Be(DateTime.UtcNow.AddSeconds(-1).ToString("G")[..10]);
+            // Check the last updated date and time using the hidden attribute with the time in UTC
+            if (DateTime.TryParse(_indexPageObject.LastUpdated.GetAttribute("last-updated-utc"), out DateTime lastUpdated))
+            {
+                var dateDifference = expectedLastUpdated.Subtract(lastUpdated);
+                dateDifference.TotalSeconds.Should().BeInRange(0, 30);
+            } else
+            {
+                Assert.True(false, $"Invalid last updated date {_indexPageObject.LastUpdated.Text}");
+            }
 
             // Check the total tweets count
             var totalTweetsValue = _indexPageObject.TotalTweets.Text;

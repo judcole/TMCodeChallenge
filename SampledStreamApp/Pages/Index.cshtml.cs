@@ -6,7 +6,7 @@ namespace SampledStreamApp.Pages
     // Class for Index page data model
     public class IndexModel : PageModel
     {
-        // Shared statistics object
+        // Shared statistics object to provide values for display
         private static readonly SampledStreamStats s_stats = new();
 
         // Average daily number of tweets received
@@ -19,7 +19,7 @@ namespace SampledStreamApp.Pages
         public ulong HourlyTweets { get { return s_stats.HourlyTweets; } }
 
         // Date and time of the last stats update
-        public string LastUpdated { get { return s_stats.LastUpdated.ToString("G"); } }
+        public DateTime LastUpdated { get { return s_stats.LastUpdated; } }
 
         // Top Hashtags
         public ulong TopHashtagCounts (int index) { return s_stats.TopHashtagCounts[index]; }

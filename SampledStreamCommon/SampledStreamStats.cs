@@ -33,12 +33,18 @@ namespace SampledStreamCommon
         public ulong TweetQueueCount { get; set; }
 
         /// <summary>
-        /// Construct the SampledStreamStats instance
+        /// Construct the SampledStreamStats instance defaulting to the current date and time
         /// </summary>
-        public SampledStreamStats()
+        public SampledStreamStats() : this(DateTime.UtcNow) { }
+
+        /// <summary>
+        /// Construct the SampledStreamStats instance with a specified date and time
+        /// </summary>
+        /// <param name="lastUpdated">Date and time of last update</param>
+        public SampledStreamStats(DateTime lastUpdated)
         {
-            // Default to the current UTC date and time
-            LastUpdated = DateTime.UtcNow;
+            // Use the provided last updated date and time
+            LastUpdated = lastUpdated;
         }
     }
 }

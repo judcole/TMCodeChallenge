@@ -41,7 +41,13 @@
 				</tr>
 				<tr>
 					<td>Last updated</td>
-					<td id="last-updated">@Model.LastUpdated</td>
+					<td id="last-updated" last-updated-utc='@Model.LastUpdated.ToString("G")'>
+						<script type="text/javascript">
+							var strDate = new String('@Model.LastUpdated.ToString("MM/dd/yyyy hh:mm:ss tt") UTC');
+							var localTime = new Date(strDate);
+							document.write(localTime.toLocaleString());
+						</script>
+					</td>
 				</tr>
 				<tr>
 					<td>Total tweets</td>
@@ -65,11 +71,11 @@
 				</tr>
 				@for (int i = 0; i < @SampledStreamCommon.SampledStreamStats.TopHashtagsSize; i++)
 				{
-				<tr>
-					<td>@(i+1)</td>
-					<td id="hashtag-@i">@Model.TopHashtags(i)</td>
-					<td id="hashtag-count-@i">@Model.TopHashtagCounts(i)</td>
-				</tr>
+					<tr>
+						<td>@(i+1)</td>
+						<td id="hashtag-@i">@Model.TopHashtags(i)</td>
+						<td id="hashtag-count-@i">@Model.TopHashtagCounts(i)</td>
+					</tr>
 				}
 			</table>
 		</div>

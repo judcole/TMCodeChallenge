@@ -19,7 +19,7 @@ namespace SampledStreamCollectorTests
         /// <summary>
         /// Test that the creation of a new SampledStreamStats object is successful
         /// </summary>
-        [Fact()]
+        [Fact]
         public void SampledStreamStats_Create_ReturnInstance()
         {
             // Create an instance
@@ -39,6 +39,26 @@ namespace SampledStreamCollectorTests
             }
             newStats.TotalTweets.Should().Be(0);
             newStats.TweetQueueCount.Should().Be(0);
+        }
+
+        /// <summary>
+        /// Test that setting the Tweet Queue count is successful
+        /// </summary>
+        /// <param name="value">The value for the count</param>
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(99)]
+        public void SampledStreamStats_SetQueueCount_Successful(ulong value)
+        {
+            // Create an instance
+            var newStats = CreateStatsInstance();
+
+            // Set the Queue count
+            newStats.TweetQueueCount = value;
+
+            // Check the result
+            newStats.TweetQueueCount.Should().Be(value);
         }
 
         /// <summary>
