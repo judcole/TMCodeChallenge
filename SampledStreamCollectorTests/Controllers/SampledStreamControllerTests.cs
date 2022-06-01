@@ -43,26 +43,33 @@ namespace SampledStreamCollector.Controllers.Tests
         /// Test that the SampledStreamController Get method returns valid statistics
         /// </summary>
         [Fact()]
-        public void SampledStreamController_Get_ReturnStats()
+        public async Task SampledStreamController_GetStats_ReturnStats()
         {
-            _testOutputHelper.WriteLine("Starting SampledStreamController_Get_ReturnStats");
+            _testOutputHelper.WriteLine("Starting SampledStreamController_GetStats_ReturnStats");
 
             // Create an instance
-            var newController = CreateControllerInstance();
+            var controller = CreateControllerInstance();
 
             // Call the Get method
-            var stats = newController.Get();
+            var result = await controller.GetStats();
 
-            // Check the basic results
+            // Check that we have a result
+            var stats = result.Value;
             stats.Should().NotBeNull();
-            stats.TotalTweets.Should().BeGreaterThan(0);
-            stats.Status.Should().Be("Good");
 
-            // Check the calculated results
-            stats.DailyTweets.Should().Be(stats.TotalTweets);
-            stats.HourlyTweets.Should().Be(stats.TotalTweets);
+            // Include explicit check to remove 'could be null' warning message
+            if (stats is not null)
+            {
+                // Check the basic results
+                stats.TotalTweets.Should().BeGreaterThan(0);
+                stats.Status.Should().Be("Good");
 
-            _testOutputHelper.WriteLine("Ending SampledStreamController_Get_ReturnStats");
+                // Check the calculated results
+                stats.DailyTweets.Should().Be(stats.TotalTweets);
+                stats.HourlyTweets.Should().Be(stats.TotalTweets);
+            }
+
+            _testOutputHelper.WriteLine("Ending SampledStreamController_GetStats_ReturnStats");
         }
 
         /// <summary>

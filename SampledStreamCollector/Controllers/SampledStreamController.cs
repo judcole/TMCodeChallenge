@@ -7,7 +7,7 @@ namespace SampledStreamCollector.Controllers
     /// Class for the controller to get the latest statistics
     /// </summary>
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/Get[controller]")]
     public class SampledStreamController : ControllerBase
     {
         // Application start time
@@ -34,7 +34,7 @@ namespace SampledStreamCollector.Controllers
         /// </summary>
         /// <returns>Statistics object containing the latest stats</returns>
         [HttpGet(Name = "GetSampledStreamStats")]
-        public SampledStreamStats Get()
+        public async Task<ActionResult<SampledStreamStats>> GetStats()
         {
             // Advance the tweet count
             s_tweetCount += 5;
@@ -42,10 +42,12 @@ namespace SampledStreamCollector.Controllers
             // Log the call
             _logger.LogInformation("Returning a tweet count of {s_tweetCount}", s_tweetCount);
 
-            // Get the stats data
-            var stats = GetSampledStreamStats();
+            var stats = await Task.Run(() =>
+                // Get the stats data
+                GetSampledStreamStats()
+            );
 
-            // Return the stats data
+            // Return the stats data with a 200 (Ok)
             return stats;
         }
 
