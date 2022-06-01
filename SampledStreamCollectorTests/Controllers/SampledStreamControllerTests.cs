@@ -53,10 +53,14 @@ namespace SampledStreamCollector.Controllers.Tests
             // Call the Get method
             var stats = newController.Get();
 
-            // Check the result
+            // Check the basic results
             stats.Should().NotBeNull();
             stats.TotalTweets.Should().BeGreaterThan(0);
             stats.Status.Should().Be("Good");
+
+            // Check the calculated results
+            stats.DailyTweets.Should().Be(stats.TotalTweets);
+            stats.HourlyTweets.Should().Be(stats.TotalTweets);
 
             _testOutputHelper.WriteLine("Ending SampledStreamController_Get_ReturnStats");
         }

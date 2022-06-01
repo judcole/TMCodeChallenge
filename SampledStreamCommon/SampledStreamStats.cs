@@ -9,10 +9,10 @@ namespace SampledStreamCommon
         public const int TopHashtagsSize = 10;
 
         // Average daily number of tweets received
-        public ulong DailyTweets { get; set; }
+        public ulong DailyTweets { get; private set; }
 
         // Average hourly number of tweets received
-        public ulong HourlyTweets { get; set; }
+        public ulong HourlyTweets { get; private set; }
 
         // Date and time of statistics
         public DateTime LastUpdated { get; set; }
@@ -45,6 +45,22 @@ namespace SampledStreamCommon
         {
             // Use the provided last updated date and time
             LastUpdated = lastUpdated;
+        }
+
+        /// <summary>
+        /// Calculate and set all calculated fields
+        /// </summary>
+        /// <param name="startTime">The application start time for evaluating the elapsed time</param>
+        public void SetCalculatedFields(DateTime startTime)
+        {
+            // Calculate and set the daily tweet rate
+            var elapsedTime = LastUpdated.Subtract(startTime);
+            var elapsedDays = Math.Ceiling(elapsedTime.TotalDays);
+            DailyTweets = (ulong)(Math.Ceiling((double)TotalTweets) / elapsedDays);
+
+            // Calculate and set the hourly tweet rate
+            var elapsedHours = Math.Ceiling(elapsedTime.TotalHours);
+            HourlyTweets = (ulong)(Math.Ceiling((double)TotalTweets) / elapsedHours);
         }
     }
 }

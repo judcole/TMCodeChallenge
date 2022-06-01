@@ -42,13 +42,30 @@ namespace SampledStreamApp.Pages.Tests
             _webDriver = webDriver;
         }
 
-        // Reset the Web driver URL to the Index page
-        public void ResetIndexPage()
+        /// <summary>
+        /// Navigate the Web driver to the Index page
+        /// </summary>
+        /// <returns>Whether or not it was successful</returns>
+        public bool NavigateToIndexPage()
         {
+            // Assume success
+            bool success = true;
+
             if (_webDriver.Url != _indexPageUrl)
             {
-                _webDriver.Url = _indexPageUrl;
+                // Attempt to navigate to the URL
+                try
+                {
+                    _webDriver.Url = _indexPageUrl;
+                }
+                catch
+                {
+                    // Indicate failure, probably because the Web App is not loaded
+                    success = false;
+                }
             }
+
+            return success;
         }
     }
 }

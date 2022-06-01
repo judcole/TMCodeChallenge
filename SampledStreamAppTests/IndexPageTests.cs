@@ -77,6 +77,7 @@ namespace SampledStreamApp.Pages.Tests
             dateDifference.TotalSeconds.Should().BeInRange(0, 30);
             indexModel.DailyTweets.Should().BeGreaterThan(0);
             indexModel.HourlyTweets.Should().BeGreaterThan(0);
+            indexModel.Status.Should().Be("Good");
             indexModel.TotalTweets.Should().BeGreaterThan(0);
 
             _testOutputHelper.WriteLine("IndexModelOnGet_Request_ReturnStats");
@@ -93,7 +94,12 @@ namespace SampledStreamApp.Pages.Tests
             var expectedLastUpdated = DateTime.UtcNow;
 
             // Navigate to the index page
-            _indexPageObject.ResetIndexPage();
+            if (!_indexPageObject.NavigateToIndexPage()) {
+                // WebDriver app is not running so just log it and return
+                _testOutputHelper.WriteLine("Web App is not running on localhost so skipping Selenium tests");
+
+                return;
+            }
 
             // Check the last updated date and time using the hidden attribute with the time in UTC
             if (DateTime.TryParse(_indexPageObject.LastUpdated.GetAttribute("last-updated-utc"), out DateTime lastUpdated))
@@ -107,15 +113,15 @@ namespace SampledStreamApp.Pages.Tests
 
             // Check the total tweets count
             var totalTweetsValue = _indexPageObject.TotalTweets.Text;
-            Int32.Parse(totalTweetsValue).Should().BeInRange(4, 8);
+            Int32.Parse(totalTweetsValue).Should().BeInRange(100, 200);
 
             // Check the daily tweets count
             var dailyTweetsValue = _indexPageObject.DailyTweets.Text;
-            Int32.Parse(dailyTweetsValue).Should().BeInRange(2, 4);
+            Int32.Parse(dailyTweetsValue).Should().BeInRange(100, 200);
 
             // Check the hourly tweets count
             var hourlyTweetsValue = _indexPageObject.HourlyTweets.Text;
-            Int32.Parse(hourlyTweetsValue).Should().BeInRange(3, 6);
+            Int32.Parse(hourlyTweetsValue).Should().BeInRange(100, 200);
 
             // Check the top hashtag 1
             var topHashtag1Value = _indexPageObject.TopHashtag1.Text;

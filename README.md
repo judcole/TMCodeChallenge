@@ -1,6 +1,6 @@
 # TM Code Challenge Notes
 
-[//]: # ( date: 05/31/22 )
+[//]: # ( date: 06/01/22 )
 
 ## 1. Overview
 
@@ -26,7 +26,7 @@ This document contains (rudimentary) documentation and links for setting up and 
   - [7.2. Run / Debug the solution projects](#72-run--debug-the-solution-projects)
 - [8. References](#8-references)
 
-[//]: # ( spell-checker: ignore choco dockerignore plantuml sampledstream )
+[//]: # ( spell-checker: ignore blazor choco dockerignore plantuml sampledstream )
 
 ## 2. Specification
 
@@ -57,8 +57,11 @@ This document contains (rudimentary) documentation and links for setting up and 
 - Select project SampledStreamApp
   - Note that all browser Unit Tests are currently hard coded to use Chrome (see To Do List)
   - Select `IIS Express` as Build Target on drop down (could also select `Docker` if you have Docker Desktop and WSL installed)
-  - Start project without Debugging (`Ctrl+F5`) to show default Web page on localhost
-  - Run all automated tests (`Ctrl+R, A`) or open from Test Explorer (`Ctrl+E, T`)
+  - Optional:
+    - Start project without Debugging (`Ctrl+F5`) to show default Web page on localhost
+    - If this is not run then the Selenium tests of the results web page will be skipped
+    - If this is run then the Selenium based tests of the results web page will be performed
+  - Run all automated tests (`Ctrl+R, A`) or open the tests from Test Explorer (`Ctrl+E, T`) and run selected tests
 
 ### 4.2. Manual Tests
 
@@ -88,11 +91,11 @@ This document contains (rudimentary) documentation and links for setting up and 
   - [x] Stats for API result to use shared class
     - [x] Return extra stats
   - [ ] Attach to Twitter stream
-    - [ ] Add incoming tweets to concurrent queue
+    - [ ] Add incoming tweets to concurrent queue with unit tests
   - [ ] Launch separate thread to pull incoming tweets from concurrent queue
-    - [ ] Extract hash tags
-    - [ ] Add / update totals
-    - [ ] Add / update top 10 tag list
+    - [ ] Loop through tweets extracting hashtags, with unit tests
+    - [ ] Add / update totals, with unit tests
+    - [ ] Add / update top 10 tag list, with unit tests
 - [x] Create SampleStreamedApp project from ASP.NET Core Web App template in solution TMCodeChallenge
   - [x] Replace home page with dummy stream stats
   - [x] Add Test suite project and basic tests
@@ -115,17 +118,18 @@ This document contains (rudimentary) documentation and links for setting up and 
 
 ### 5.2. Future Next Steps
 
-| Priority | Category | Description                                                                     |
-| :------: | -------- | ------------------------------------------------------------------------------- |
-|    M     | Security | Add OAUTH to secure Swagger UI                                                  |
-|    M     | Tooling  | Use gRPC for improving service performance and efficiency                       |
-|    M     | Tooling  | Use GraphQL for more advanced APIs                                              |
-|    M     | Tooling  | Build a class library for the entity data model for persistence                 |
-|    L     | Tooling  | Minimize size of Docker containers by removing unneeded apps and tools          |
-|    M     | Tooling  | Create deployment automation script / Docker compose file for Docker containers |
-|    M     | Tests    | Finish setting up unit tests to run in parallel                                 |
-|    H     | Tests    | Enhance to also run tests in FireFox and Edge                                   |
-|          |          |                                                                                 |
+| Priority | Category | Effort | Description                                                                        |
+| :------: | -------- | :----: | ---------------------------------------------------------------------------------- |
+|    H     | Tests    |   M    | Enhance Web UI tests to also run in FireFox and Edge                               |
+|    M     | Security |   M    | Add OAUTH to secure Swagger UI                                                     |
+|    M     | Tooling  |   M    | Use gRPC for improving service performance and efficiency                          |
+|    M     | Tooling  |   M    | Use GraphQL for more advanced APIs                                                 |
+|    M     | Tooling  |   M    | Build a class library for the entity data model for persistence                    |
+|    M     | Tooling  |   M    | Create deployment automation script / Docker compose file for Docker containers    |
+|    M     | Tests    |   M    | Add testing of Blazor rendered pages using bUnit                                   |
+|    M     | Tests    |   M    | Finish setting up unit tests to run in parallel                                    |
+|    L     | Tooling  |   M    | Minimize size of Docker containers by removing unneeded apps and tools             |
+|    L     | Tests    |   M    | Handle remaining edge cases of running the date and time tests at exactly midnight |
 
 ## 6. Design diagrams
 

@@ -10,6 +10,9 @@ namespace SampledStreamCollector.Controllers
     [Route("[controller]")]
     public class SampledStreamController : ControllerBase
     {
+        // Application start time
+        private static readonly DateTime s_startTime = DateTime.UtcNow;
+
         // Total count of all tweets
         private static ulong s_tweetCount = 0;
 
@@ -39,12 +42,27 @@ namespace SampledStreamCollector.Controllers
             // Log the call
             _logger.LogInformation("Returning a tweet count of {s_tweetCount}", s_tweetCount);
 
-            // Return the data
-            return new SampledStreamStats
+            // Get the stats data
+            var stats = GetSampledStreamStats();
+
+            // Return the stats data
+            return stats;
+        }
+
+        private static SampledStreamStats GetSampledStreamStats()
+        {
+            // Create the stats data
+            var stats = new SampledStreamStats
             {
                 Status = "Good",
                 TotalTweets = s_tweetCount
             };
+
+            // Calculate and set all calculated fields
+            stats.SetCalculatedFields(s_startTime);
+
+            // Return the stats data
+            return stats;
         }
     }
 }
