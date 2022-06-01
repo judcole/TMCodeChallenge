@@ -21,6 +21,9 @@ namespace SampledStreamApp.Pages
         // Date and time of the last stats update
         public DateTime LastUpdated { get { return s_stats.LastUpdated; } }
 
+        // Extra status information
+        public string? Status { get { return s_stats.Status; } }
+
         // Top Hashtags
         public ulong TopHashtagCounts (int index) { return s_stats.TopHashtagCounts[index]; }
 
@@ -40,18 +43,20 @@ namespace SampledStreamApp.Pages
             _logger = logger;
         }
 
-        // Construct the page on a GET action
-        public void OnGet()
+        // Construct and return the page on a GET action
+        public PageResult OnGet()
         {
             // Get the name of the current day for the heading
             DayName = DateTime.Now.ToString("dddd");
 
+            // Set some home page values just for now
+            s_stats.Status = "Good";
+            s_stats.TotalTweets += 100;
+            s_stats.SetCalculatedFields(DateTime.UtcNow.AddMinutes(-1));
+
             _logger.LogInformation("Page get on {DayName} with {TotalTweets} tweets", DayName, s_stats.TotalTweets);
 
-            // Set some home page values just for now
-            s_stats.DailyTweets += 2;
-            s_stats.HourlyTweets += 3;
-            s_stats.TotalTweets += 4;
+            return Page();
         }
     }
 }
