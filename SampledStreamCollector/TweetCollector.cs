@@ -12,16 +12,20 @@ namespace SampledStreamCollector
     /// </summary>
     public class TweetCollector : BackgroundService
     {
+        // Name of bearer token environment variable
         private const string BearerTokenEnvironmentString = "STREAM_BEARER_TOKEN";
+
+        // Message to display and send to the API if the token is missing
         private const string BearerTokenMissingMessage = $"To access the Twitter API please set the {BearerTokenEnvironmentString} environment variable";
 
+        // URL of Twitter stream API
         private const string TwitterApiUrl = "https://api.twitter.com/2/tweets/sample/stream";
-        private readonly HttpClient _httpClient = new();
-        StreamReader? _reader;
-
 
         // The Twitter stream API authentication bearer token (read from the environment)
-        private static readonly string? s_bearerToken = Environment.GetEnvironmentVariable(BearerTokenEnvironmentString);
+        private readonly string? _bearerToken = Environment.GetEnvironmentVariable(BearerTokenEnvironmentString);
+
+        // HTTP client for accessing the Twitter API
+        private readonly HttpClient _httpClient = new();
 
         // Application logger
         private readonly ILogger<TweetCollector> _logger;
@@ -31,6 +35,12 @@ namespace SampledStreamCollector
 
         // Queue of tweets to process
         private readonly IBackgroundQueue<Tweet> _tweetQueue;
+
+        // Cancellation token source to manage cancellation of the Twitter API read task
+        private CancellationTokenSource? _tweetStreamCancellationTokenSource;
+
+        // Stream reader for accessing the Twitter API
+        private StreamReader? _tweetStreamReader;
 
         /// <summary>
         /// Construct the collector instance
@@ -102,8 +112,6 @@ namespace SampledStreamCollector
             _logger.LogInformation("{Type} is now shutting down", nameof(BackgroundWorker));
         }
 
-        private CancellationTokenSource? _tweetStreamCancellationTokenSource;
-
         /// <summary>
         /// Asynchronously execute the body of the background service
         /// </summary>
@@ -114,7 +122,7 @@ namespace SampledStreamCollector
             // Await right away so Host Startup can continue.
             await Task.Delay(10, stoppingToken).ConfigureAwait(false);
 
-            if (s_bearerToken is null)
+            if (_bearerToken is null)
             {
                 // No bearer token so log it and indicate it in the statistics data
                 _logger.LogCritical(BearerTokenMissingMessage);
@@ -128,7 +136,7 @@ namespace SampledStreamCollector
                 // Kick of the Twitter stream reader as a separate background task
                 _ = Task.Run(async () =>
                 {
-                    await ReadTweetStreamsAsync(s_bearerToken, _tweetStreamCancellationTokenSource);
+                    await ReadTweetStreamsAsync(_bearerToken, _tweetStreamCancellationTokenSource);
                 }, _tweetStreamCancellationTokenSource.Token);
 
                 // Kick off the main background processing task
@@ -146,8 +154,8 @@ namespace SampledStreamCollector
 
             if (force)
             {
-                _reader?.Close();
-                _reader?.Dispose();
+                _tweetStreamReader?.Close();
+                _tweetStreamReader?.Dispose();
             }
         }
 
@@ -161,13 +169,13 @@ namespace SampledStreamCollector
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
             var res = await _httpClient.GetAsync(TwitterApiUrl, HttpCompletionOption.ResponseHeadersRead, cancellationTokenSource.Token);
 
-            _reader = new(await res.Content.ReadAsStreamAsync(cancellationTokenSource.Token));
+            _tweetStreamReader = new(await res.Content.ReadAsStreamAsync(cancellationTokenSource.Token));
 
             try
             {
-                while (!_reader.EndOfStream && !cancellationTokenSource.IsCancellationRequested)
+                while (!_tweetStreamReader.EndOfStream && !cancellationTokenSource.IsCancellationRequested)
                 {
-                    var str = await _reader.ReadLineAsync();
+                    var str = await _tweetStreamReader.ReadLineAsync();
 
                     if (string.IsNullOrWhiteSpace(str))
                     {
