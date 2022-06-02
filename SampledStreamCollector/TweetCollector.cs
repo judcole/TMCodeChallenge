@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Net.Http.Headers;
+using System.Net.Sockets;
 using SampledStreamCommon;
 
 // Todo: Replace implementation with a .NET Queue Service https://docs.microsoft.com/en-us/dotnet/core/extensions/queue-service
@@ -13,6 +15,12 @@ namespace SampledStreamCollector
         private const string BearerTokenEnvironmentString = "STREAM_BEARER_TOKEN";
         private const string BearerTokenMissingMessage = $"To access the Twitter API please set the {BearerTokenEnvironmentString} environment variable";
 
+        private const string TwitterApiUrl = "https://api.twitter.com/2/tweets/sample/stream";
+        private readonly HttpClient _httpClient = new();
+        StreamReader? _reader;
+
+
+        // The Twitter stream API authentication bearer token (read from the environment)
         private static readonly string? s_bearerToken = Environment.GetEnvironmentVariable(BearerTokenEnvironmentString);
 
         // Application logger
@@ -54,12 +62,14 @@ namespace SampledStreamCollector
                     // Get the current time for various calculatins
                     var time = DateTimeOffset.UtcNow;
                     var seconds = time.Second;
-                    
+
                     if ((seconds % 10 == 0) && (seconds != messageSeconds))
                     {
-                        // Log a message every 10 seconds or so and remember we have done so for this second
+                        // Log a message every 10 seconds or so
                         _logger.LogInformation("Worker running at: {time} with {count} tweets queued",
                             time, _tweetQueue.GetCount());
+
+                        // Remember we have done so for this second so we don't log twice
                         messageSeconds = seconds;
                     }
 
@@ -92,6 +102,8 @@ namespace SampledStreamCollector
             _logger.LogInformation("{Type} is now shutting down", nameof(BackgroundWorker));
         }
 
+        private CancellationTokenSource? _tweetStreamCancellationTokenSource;
+
         /// <summary>
         /// Asynchronously execute the body of the background service
         /// </summary>
@@ -110,9 +122,76 @@ namespace SampledStreamCollector
             }
             else
             {
-                // Kick off the background processing task
+                // Set up a cancellation token source for the Twitter stream reader
+                _tweetStreamCancellationTokenSource = new();
+
+                // Kick of the Twitter stream reader as a separate background task
+                _ = Task.Run(async () =>
+                {
+                    await ReadTweetStreamsAsync(s_bearerToken, _tweetStreamCancellationTokenSource);
+                }, _tweetStreamCancellationTokenSource.Token);
+
+                // Kick off the main background processing task
                 await BackgroundProcessing(stoppingToken);
             }
+        }
+
+        /// <summary>
+        /// Closes the tweet stream started by <see cref="NextTweetStreamAsync"/>. 
+        /// </summary>
+        /// <param name="force">If true, the stream will be closed immediately. With falls the thread had to wait for the next keep-alive signal (every 20 seconds)</param>
+        public void CancelTweetStream(bool force = true)
+        {
+            _tweetStreamCancellationTokenSource?.Dispose();
+
+            if (force)
+            {
+                _reader?.Close();
+                _reader?.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Read tweets from the tweet stream and queue them
+        /// </summary>
+        /// <param name="bearerToken">The Twitter API bearer token</param>
+        /// <returns>An async task for the tweet reader</returns>
+        private async Task ReadTweetStreamsAsync(string bearerToken, CancellationTokenSource cancellationTokenSource)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+            var res = await _httpClient.GetAsync(TwitterApiUrl, HttpCompletionOption.ResponseHeadersRead, cancellationTokenSource.Token);
+
+            _reader = new(await res.Content.ReadAsStreamAsync(cancellationTokenSource.Token));
+
+            try
+            {
+                while (!_reader.EndOfStream && !cancellationTokenSource.IsCancellationRequested)
+                {
+                    var str = await _reader.ReadLineAsync();
+
+                    if (string.IsNullOrWhiteSpace(str))
+                    {
+                        // A keep-alive string so just ignore it
+                        continue;
+                    }
+
+                    Tweet tweet = new("xxx");
+                    _tweetQueue.Enqueue(tweet);
+
+                    //onNextTweet(ParseData<Tweet>(str).Data);
+                }
+            }
+            catch (IOException e)
+            {
+                // Check for a connection aborted socket exception
+                if (!((e.InnerException is SocketException se) && (se.SocketErrorCode == SocketError.ConnectionAborted)))
+                {
+                    // Not a connection aborted socket exception so rethrow it
+                    throw;
+                }
+            }
+
+            CancelTweetStream();
         }
 
         /// <summary>
@@ -135,7 +214,7 @@ namespace SampledStreamCollector
         /// Triggered when the background processing should stop
         /// </summary>
         /// <param name="cancellationToken">Token used to indicate a forced stop</param>
-        /// <returns>An async task for the </returns>
+        /// <returns>An async task for the cancellation</returns>
         public override Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogCritical(
@@ -143,6 +222,10 @@ namespace SampledStreamCollector
                 nameof(BackgroundWorker)
             );
 
+            // Cancel the tweet stream reader
+            CancelTweetStream(true);
+
+            // Return the async task
             return base.StopAsync(cancellationToken);
         }
     }
