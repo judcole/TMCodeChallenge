@@ -5,6 +5,9 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using Xunit.Abstractions;
 
+// Todo: Add testing of Blazor rendered pages using bUnit
+// Todo: Enhance Web UI tests to also run in FireFox and Edge
+
 namespace SampledStreamApp.Pages.Tests
 {
     /// <summary>
