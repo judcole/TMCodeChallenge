@@ -35,7 +35,7 @@ namespace SampledStreamApp.Pages.Tests
         // Total tweet count
         public IWebElement TotalTweets => _webDriver.FindElement(By.Id("total-tweets"));
 
-        // Construct the page object
+        // Construct the page instance
         public IndexPageObject(IWebDriver webDriver)
         {
             // Save the Web driver

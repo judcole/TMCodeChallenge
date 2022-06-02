@@ -36,7 +36,7 @@ namespace SampledStreamApp.Pages
         // Application logger
         private readonly ILogger<IndexModel> _logger;
 
-        // Construct the model object
+        // Construct the model instance
         public IndexModel(ILogger<IndexModel> logger)
         {
             // Save the application logger

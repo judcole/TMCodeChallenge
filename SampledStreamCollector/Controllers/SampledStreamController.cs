@@ -20,7 +20,7 @@ namespace SampledStreamCollector.Controllers
         private readonly ILogger<SampledStreamController> _logger;
 
         /// <summary>
-        /// Construct the controller object
+        /// Construct the controller instance
         /// </summary>
         /// <param name="logger"></param>
         public SampledStreamController(ILogger<SampledStreamController> logger)

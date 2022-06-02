@@ -9,7 +9,7 @@ namespace SampledStreamCollectorTests
     public class SampledStreamStatsTests
     {
         /// <summary>
-        /// Construct the tests object
+        /// Construct the tests instance
         /// </summary>
         public SampledStreamStatsTests()
         {
