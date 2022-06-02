@@ -69,7 +69,7 @@ namespace SampledStreamApp.Pages.Tests
             indexModel.Should().NotBeNull();
             indexModel.DayName.Should().Be(null);
             var dateDifference = indexModel.LastUpdated.Subtract(expectedLastUpdated);
-            dateDifference.TotalSeconds.Should().BeInRange(0, 30);
+            dateDifference.TotalSeconds.Should().BeInRange(-30, 30);
 
             // Call the method
             indexModel.OnGet();
@@ -77,7 +77,7 @@ namespace SampledStreamApp.Pages.Tests
             // Check the model state
             indexModel.DayName.Should().Be(DateTime.Now.ToString("dddd"));
             dateDifference = indexModel.LastUpdated.Subtract(expectedLastUpdated);
-            dateDifference.TotalSeconds.Should().BeInRange(0, 30);
+            dateDifference.TotalSeconds.Should().BeInRange(-30, 30);
             indexModel.DailyTweets.Should().BeGreaterThan(0);
             indexModel.HourlyTweets.Should().BeGreaterThan(0);
             indexModel.Status.Should().Be("Good");
@@ -108,7 +108,7 @@ namespace SampledStreamApp.Pages.Tests
             if (DateTime.TryParse(_indexPageObject.LastUpdated.GetAttribute("last-updated-utc"), out DateTime lastUpdated))
             {
                 var dateDifference = expectedLastUpdated.Subtract(lastUpdated);
-                dateDifference.TotalSeconds.Should().BeInRange(0, 30);
+                dateDifference.TotalSeconds.Should().BeInRange(-30, 30);
             } else
             {
                 Assert.True(false, $"Invalid last updated date {_indexPageObject.LastUpdated.Text}");
