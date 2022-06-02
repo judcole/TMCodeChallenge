@@ -42,13 +42,23 @@ namespace SampledStreamCollector.Controllers
             // Log the call
             _logger.LogInformation("Returning a tweet count of {s_tweetCount}", s_tweetCount);
 
-            var stats = await Task.Run(() =>
+            SampledStreamStats? stats = null;
+
+            stats = await Task.Run(() =>
                 // Get the stats data
                 GetSampledStreamStats()
             );
 
-            // Return the stats data with a 200 (Ok)
-            return stats;
+            if (stats is null)
+            {
+                // Something went wrong so return a Not Found status code
+                return NotFound();
+            }
+            else
+            {
+                // Return the stats data with a 200 (Ok)
+                return stats;
+            }
         }
 
         private static SampledStreamStats GetSampledStreamStats()
