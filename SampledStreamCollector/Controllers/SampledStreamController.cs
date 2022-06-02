@@ -42,7 +42,7 @@ namespace SampledStreamCollector.Controllers
             _logger.LogInformation("Returning a tweet count of {count}", _stats.TotalTweets);
 
             var stats = await Task.Run(() =>
-                // Get the stats data
+                // Get the latest statistics data
                 GetSampledStreamStats()
             );
 
@@ -58,6 +58,10 @@ namespace SampledStreamCollector.Controllers
             }
         }
 
+        /// <summary>
+        /// Get the latest statistics data
+        /// </summary>
+        /// <returns>The latest statisics data</returns>
         private SampledStreamStats GetSampledStreamStats()
         {
             // Advance some counts for testing for now
