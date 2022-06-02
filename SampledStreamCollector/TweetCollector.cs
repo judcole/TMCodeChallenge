@@ -11,6 +11,8 @@ namespace SampledStreamCollector
     public class TweetCollector : BackgroundService
     {
         private const string BearerTokenEnvironmentString = "STREAM_BEARER_TOKEN";
+        private const string BearerTokenMissingMessage = $"To access the Twitter API please set the {BearerTokenEnvironmentString} environment variable";
+
         private static readonly string? s_bearerToken = Environment.GetEnvironmentVariable(BearerTokenEnvironmentString);
 
         // Application logger
@@ -34,12 +36,6 @@ namespace SampledStreamCollector
             _logger = logger;
             _stats = stats;
             _tweetQueue = queue;
-
-            if (s_bearerToken is null)
-            {
-                // No bearer token so give up now
-                //throw new Exception($"Please make sure you set the {BearerTokenEnvironmentString} environment variable");
-            }
         }
         /// <summary>
         /// The background processor of queued Tweets
@@ -48,6 +44,8 @@ namespace SampledStreamCollector
         /// <returns>An async task for the background processor</returns>
         private async Task BackgroundProcessing(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("{Type} is now running in the background", nameof(BackgroundWorker));
+
             int messageSeconds = 0;
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -80,15 +78,18 @@ namespace SampledStreamCollector
                     }
                     else
                     {
-                        // There are no more tweets to process then wait a while
+                        // There are no more tweets to process so wait a little while
                         await Task.Delay(500, stoppingToken);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogCritical("An error occurred when processing a Tweet: Exception: {@Exception}", ex);
+                    _logger.LogCritical("An error occurred when processing tweets: Exception: {@Exception}", ex);
+                    _stats.Status = $"An error occurred when processing tweets: Exception: {ex}";
                 }
             }
+
+            _logger.LogInformation("{Type} is now shutting down", nameof(BackgroundWorker));
         }
 
         /// <summary>
@@ -98,9 +99,20 @@ namespace SampledStreamCollector
         /// <returns>An async task for the background service</returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("{Type} is now running in the background", nameof(BackgroundWorker));
+            // Await right away so Host Startup can continue.
+            await Task.Delay(10, stoppingToken).ConfigureAwait(false);
 
-            await BackgroundProcessing(stoppingToken);
+            if (s_bearerToken is null)
+            {
+                // No bearer token so log it and indicate it in the statistics data
+                _logger.LogCritical(BearerTokenMissingMessage);
+                _stats.Status = BearerTokenMissingMessage;
+            }
+            else
+            {
+                // Kick off the background processing task
+                await BackgroundProcessing(stoppingToken);
+            }
         }
 
         /// <summary>
