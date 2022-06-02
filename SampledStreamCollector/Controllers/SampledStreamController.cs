@@ -13,20 +13,22 @@ namespace SampledStreamCollector.Controllers
         // Application start time
         private static readonly DateTime s_startTime = DateTime.UtcNow;
 
-        // Total count of all tweets
-        private static ulong s_tweetCount = 0;
-
         // Application logger
         private readonly ILogger<SampledStreamController> _logger;
+
+        // Shared total statistics
+        private readonly SampledStreamStats _stats;
 
         /// <summary>
         /// Construct the controller instance
         /// </summary>
+        /// <param name="stats">Shared total statistics</param>
         /// <param name="logger"></param>
-        public SampledStreamController(ILogger<SampledStreamController> logger)
+        public SampledStreamController(SampledStreamStats stats, ILogger<SampledStreamController> logger)
         {
-            // Save the application logger
+            // Save the parameters
             _logger = logger;
+            _stats = stats;
         }
 
         /// <summary>
@@ -36,15 +38,10 @@ namespace SampledStreamCollector.Controllers
         [HttpGet(Name = "GetSampledStreamStats")]
         public async Task<ActionResult<SampledStreamStats>> GetStats()
         {
-            // Advance the tweet count
-            s_tweetCount += 5;
-
             // Log the call
-            _logger.LogInformation("Returning a tweet count of {s_tweetCount}", s_tweetCount);
+            _logger.LogInformation("Returning a tweet count of {count}", _stats.TotalTweets);
 
-            SampledStreamStats? stats = null;
-
-            stats = await Task.Run(() =>
+            var stats = await Task.Run(() =>
                 // Get the stats data
                 GetSampledStreamStats()
             );
@@ -61,20 +58,17 @@ namespace SampledStreamCollector.Controllers
             }
         }
 
-        private static SampledStreamStats GetSampledStreamStats()
+        private SampledStreamStats GetSampledStreamStats()
         {
-            // Create the stats data
-            var stats = new SampledStreamStats
-            {
-                Status = "Good",
-                TotalTweets = s_tweetCount
-            };
+            // Advance some counts for testing for now
+            _stats.TotalHashtags += 10;
+            _stats.TotalTweets += 5;
 
             // Calculate and set all calculated fields
-            stats.SetCalculatedFields(s_startTime);
+            _stats.SetCalculatedFields(s_startTime);
 
             // Return the stats data
-            return stats;
+            return _stats;
         }
     }
 }

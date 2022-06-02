@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using SampledStreamCommon;
 using Xunit.Abstractions;
 
 namespace SampledStreamCollector.Controllers.Tests
@@ -62,7 +63,7 @@ namespace SampledStreamCollector.Controllers.Tests
             {
                 // Check the basic results
                 stats.TotalTweets.Should().BeGreaterThan(0);
-                stats.Status.Should().Be("Good");
+                stats.Status.Should().BeNull();
 
                 // Check the calculated results
                 stats.DailyTweets.Should().Be(stats.TotalTweets);
@@ -79,7 +80,8 @@ namespace SampledStreamCollector.Controllers.Tests
         private static SampledStreamController CreateControllerInstance()
         {
             var mockLogger = new Mock<ILogger<SampledStreamController>>();
-            return new SampledStreamController(mockLogger.Object);
+            var stats = new SampledStreamStats();
+            return new SampledStreamController(stats, mockLogger.Object);
         }
     }
 }

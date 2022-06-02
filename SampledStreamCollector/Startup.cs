@@ -29,9 +29,11 @@ namespace SampledStreamCollector
             // Add service controllers to the container
             services.AddControllers();
 
+            // Add other services and singleton values
             services
                 .AddHostedService<TweetCollector>()
-                .AddSingleton<IBackgroundQueue<Tweet>, BackgroundQueue<Tweet>>();
+                .AddSingleton<IBackgroundQueue<Tweet>, BackgroundQueue<Tweet>>()
+                .AddSingleton<SampledStreamStats>();
         }
 
         /// <summary>

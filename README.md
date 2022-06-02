@@ -1,6 +1,6 @@
 # TM Code Challenge Notes
 
-[//]: # ( date: 06/01/22 )
+[//]: # ( date: 06/02/22 )
 
 ## 1. Overview
 
@@ -17,7 +17,7 @@ This document contains (rudimentary) documentation and links for setting up and 
   - [4.2. Manual Tests](#42-manual-tests)
 - [5. Next Steps / To Do List](#5-next-steps--to-do-list)
   - [5.1. To Do before submission](#51-to-do-before-submission)
-  - [5.2. Future Next Steps](#52-future-next-steps)
+  - [5.2. Future features and steps for consideration](#52-future-features-and-steps-for-consideration)
 - [6. Design diagrams](#6-design-diagrams)
   - [6.1. SampledStream Web API](#61-sampledstream-web-api)
   - [6.2. SampledStream Web Application](#62-sampledstream-web-application)
@@ -53,7 +53,7 @@ This document contains (rudimentary) documentation and links for setting up and 
 
 ### 4.1. Automated Unit Tests
 
-- Load solution in Visual Studio
+- Load solution `TMCodeChallenge.sln` into Visual Studio
 - Select project SampledStreamApp
   - Note that all browser Unit Tests are currently hard coded to use Chrome (see To Do List)
   - Select `IIS Express` as Build Target on drop down (could also select `Docker` if you have Docker Desktop and WSL installed)
@@ -65,7 +65,7 @@ This document contains (rudimentary) documentation and links for setting up and 
 
 ### 4.2. Manual Tests
 
-- Load solution in Visual Studio
+- Load solution `TMCodeChallenge.sln` into Visual Studio
 - Select project SampledStreamCollector
   - Select `IIS Express` as Build Target on drop down (could also select `Docker` if you have Docker Desktop and WSL installed)
   - Select preferred Web Browser using Build Target drop down
@@ -73,6 +73,7 @@ This document contains (rudimentary) documentation and links for setting up and 
   - Use Swagger to Execute GET call to API
   - Examine response body
   - Execute API call repeatedly to see increasing numbers in stats
+  - Test from command line `curl -X 'GET' 'https://localhost:44355/api/GetSampledStream' -H 'accept: text/plain'`
 - Select project SampledStreamApp
   - Select `IIS Express` as Build Target (could also select `Docker` if you have Docker Desktop and WSL installed)
   - Select preferred Web Browser using Build Target drop down
@@ -87,12 +88,12 @@ This document contains (rudimentary) documentation and links for setting up and 
 - [x] Create SampleStreamedCollector project from ASP.NET Core Web API template in solution TMCodeChallenge
   - [x] Replace controller with dummy stream stats controller
   - [x] Add Test suite project and basic tests
-  - [ ] Add strategic exception handling and tests
+  - [x] Add strategic exception handling
   - [x] Stats for API result to use shared class
     - [x] Return extra stats
-  - [ ] Attach to Twitter stream
+  - [ ] Create background task to attach to Twitter stream
     - [ ] Add incoming tweets to concurrent queue with unit tests
-  - [ ] Launch separate thread to pull incoming tweets from concurrent queue
+  - [x] Create background service to pull incoming tweets from concurrent queue
     - [ ] Loop through tweets extracting hashtags, with unit tests
     - [ ] Add / update totals, with unit tests
     - [ ] Add / update top 10 tag list, with unit tests
@@ -112,24 +113,28 @@ This document contains (rudimentary) documentation and links for setting up and 
     - [x] Top 10 tags and counts
 - [x] Documentation
   - [x] Usage and testing
+  - [ ] Update diagrams with latest design
 - [ ] Submission email
   - [ ] Twitter API key
   - [ ] GitHub URL and authentication
 
-### 5.2. Future Next Steps
+### 5.2. Future features and steps for consideration
 
-| Priority | Category | Effort | Description                                                                        |
-| :------: | -------- | :----: | ---------------------------------------------------------------------------------- |
-|    H     | Tests    |   M    | Enhance Web UI tests to also run in FireFox and Edge                               |
-|    M     | Security |   M    | Add OAUTH to secure Swagger UI                                                     |
-|    M     | Tooling  |   M    | Use gRPC for improving service performance and efficiency                          |
-|    M     | Tooling  |   M    | Use GraphQL for more advanced APIs                                                 |
-|    M     | Tooling  |   M    | Build a class library for the entity data model for persistence                    |
-|    M     | Tooling  |   M    | Create deployment automation script / Docker compose file for Docker containers    |
-|    M     | Tests    |   M    | Add testing of Blazor rendered pages using bUnit                                   |
-|    M     | Tests    |   M    | Finish setting up unit tests to run in parallel                                    |
-|    L     | Tooling  |   M    | Minimize size of Docker containers by removing unneeded apps and tools             |
-|    L     | Tests    |   M    | Handle remaining edge cases of running the date and time tests at exactly midnight |
+| Priority | Category     | Effort | Description                                                                                 |
+| :------: | ------------ | :----: | ------------------------------------------------------------------------------------------- |
+|    H     | Tests        |   M    | Test and document running of tests using `dotnet` command for CI/CD automation              |
+|    M     | Security     |   M    | Add OAUTH to secure Swagger UI                                                              |
+|    M     | Tooling      |   M    | Use gRPC for improving service performance and efficiency                                   |
+|    M     | Tooling      |   M    | Use GraphQL for more advanced APIs                                                          |
+|    M     | Tooling      |   M    | Build a class library for the entity data model for persistence                             |
+|    M     | Tooling      |   S    | Create deployment automation script / Docker compose file for Docker containers             |
+|    M     | Tests        |   S    | Add testing of Blazor rendered pages using bUnit                                            |
+|    M     | Tests        |   M    | Enhance Web UI tests to also run in FireFox and Edge                                        |
+|    M     | Tests        |   M    | Finish setting up unit tests to run in parallel                                             |
+|    L     | Architecture |   M    | Replace worker BackgroundService implementation with a .NET Queue Service                   |
+|    L     | UI           |   S    | Handle any multi-cultural and multi-lingual requirements such as date and number formatting |
+|    L     | Tooling      |   S    | Minimize size of Docker containers by removing unneeded apps and tools                      |
+|    L     | Tests        |   S    | Handle any remaining edge cases of running the date and time tests at exactly midnight          |
 
 ## 6. Design diagrams
 
