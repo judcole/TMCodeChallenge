@@ -124,7 +124,7 @@ namespace SampledStreamCollectorTests
         [InlineData("")]
         [InlineData("Good")]
         [InlineData("A very bad status")]
-        public void SampledStreamStats_SetQueueCount_Successful(string status)
+        public void SampledStreamStats_SetStatus_Successful(string status)
         {
             // Create an instance
             var stats = CreateStatsInstance();
