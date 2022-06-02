@@ -30,6 +30,9 @@ namespace SampledStreamApp.Pages
         // Top Hashtags
         public string TopHashtags(int index) { return s_stats.TopHashtags[index]; }
 
+        // Total hashtag count
+        public ulong TotalHashtags { get { return s_stats.TotalHashtags; } }
+
         // Total tweet count
         public ulong TotalTweets { get { return s_stats.TotalTweets; } }
 
@@ -51,6 +54,7 @@ namespace SampledStreamApp.Pages
 
             // Set some home page values just for now
             s_stats.Status = "Good";
+            s_stats.TotalHashtags += 200;
             s_stats.TotalTweets += 100;
             s_stats.SetCalculatedFields(DateTime.UtcNow.AddMinutes(-1));
 

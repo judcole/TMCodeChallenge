@@ -26,6 +26,9 @@ namespace SampledStreamCommon
         // Top 10 Hashtags
         public string[] TopHashtags { get; set; } = new string[TopHashtagsSize];
 
+        // Total number of hashtags received
+        public ulong TotalHashtags { get; set; }
+
         // Total number of tweets received
         public ulong TotalTweets { get; set; }
 
@@ -33,18 +36,12 @@ namespace SampledStreamCommon
         public ulong TweetQueueCount { get; set; }
 
         /// <summary>
-        /// Construct the SampledStreamStats instance defaulting to the current date and time
+        /// Construct the SampledStreamStats instance with the current date and time
         /// </summary>
-        public SampledStreamStats() : this(DateTime.UtcNow) { }
-
-        /// <summary>
-        /// Construct the SampledStreamStats instance with a specified date and time
-        /// </summary>
-        /// <param name="lastUpdated">Date and time of last update</param>
-        public SampledStreamStats(DateTime lastUpdated)
+        public SampledStreamStats()
         {
-            // Use the provided last updated date and time
-            LastUpdated = lastUpdated;
+            // Set the last updated date and time
+            LastUpdated = DateTime.UtcNow;
         }
 
         /// <summary>
@@ -53,13 +50,16 @@ namespace SampledStreamCommon
         /// <param name="startTime">The application start time for evaluating the elapsed time</param>
         public void SetCalculatedFields(DateTime startTime)
         {
-            // Calculate and set the daily tweet rate
+            // Update the last updated date and time
+            LastUpdated = DateTime.UtcNow;
+
+            // Calculate and set the daily tweet rate with a check for negative durations
             var elapsedTime = LastUpdated.Subtract(startTime);
-            var elapsedDays = Math.Ceiling(elapsedTime.TotalDays);
+            var elapsedDays = Math.Max(1, Math.Ceiling(elapsedTime.TotalDays));
             DailyTweets = (ulong)(Math.Ceiling((double)TotalTweets) / elapsedDays);
 
-            // Calculate and set the hourly tweet rate
-            var elapsedHours = Math.Ceiling(elapsedTime.TotalHours);
+            // Calculate and set the hourly tweet rate with a check for negative durations
+            var elapsedHours = Math.Max(1, Math.Ceiling(elapsedTime.TotalHours));
             HourlyTweets = (ulong)(Math.Ceiling((double)TotalTweets) / elapsedHours);
         }
     }

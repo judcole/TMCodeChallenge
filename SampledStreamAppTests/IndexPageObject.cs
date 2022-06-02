@@ -32,6 +32,9 @@ namespace SampledStreamApp.Pages.Tests
         // Top hashtag 1 count
         public IWebElement TopHashtagCount2 => _webDriver.FindElement(By.Id("hashtag-count-2"));
 
+        // Total hashtag count
+        public IWebElement TotalHashtags => _webDriver.FindElement(By.Id("total-hashtags"));
+
         // Total tweet count
         public IWebElement TotalTweets => _webDriver.FindElement(By.Id("total-tweets"));
 

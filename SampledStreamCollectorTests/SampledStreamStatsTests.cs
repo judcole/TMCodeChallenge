@@ -19,12 +19,14 @@ namespace SampledStreamCollectorTests
         /// <summary>
         /// Test that setting the Tweet Queue count is successful
         /// </summary>
-        /// <param name="totalTweets">The count for the count</param>
-        /// <param name="elapsedHours">The number of hours to have elapsed</param>
+        /// <param name="totalTweets">Total number of tweets</param>
+        /// <param name="elapsedHours">Number of hours to have elapsed</param>
+        /// <param name="expectedDaily">Expected daily tweet rate</param>
+        /// <param name="expectedHourly">Expectde hourly tweet rate</param>
         [Theory]
         [InlineData(0, 0, 0, 0)]
-        [InlineData(1, 0, 0, 0)]
-        [InlineData(99, 0, 0, 0)]
+        [InlineData(1, 0, 1, 1)]
+        [InlineData(99, 0, 99, 99)]
         [InlineData(0, 1, 0, 0)]
         [InlineData(1, 1, 1, 1)]
         [InlineData(99, 1, 99, 99)]
@@ -33,19 +35,21 @@ namespace SampledStreamCollectorTests
         [InlineData(98, 12345, 0, 0)]
         [InlineData(9999, 12345, 19, 0)]
         [InlineData(99999, 12345, 194, 8)]
+        [InlineData(2000000, 12345, 3883, 162)]
         [InlineData(0, 54321, 0, 0)]
         [InlineData(1, 54321, 0, 0)]
         [InlineData(97, 54321, 0, 0)]
         [InlineData(9999, 54321, 4, 0)]
         [InlineData(99999, 54321, 44, 1)]
+        [InlineData(2000000, 54321, 883, 36)]
         public void SetCalculatedFields_SetValues_ReturnsCorrect(ulong totalTweets, int elapsedHours, ulong expectedDaily, ulong expectedHourly)
         {
             // Create an instance and set the tweet count
             var stats = CreateStatsInstance();
             stats.TotalTweets = totalTweets;
 
-            // Set a start date from the data
-            var startDate = stats.LastUpdated.AddHours(-elapsedHours);
+            // Set a start date from the data allowing a margin of a second for the test
+            var startDate = stats.LastUpdated.AddHours(-elapsedHours).AddSeconds(1);
 
             // Calculate and set the calculated fields
             stats.SetCalculatedFields(startDate);
@@ -78,16 +82,9 @@ namespace SampledStreamCollectorTests
                 stats.TopHashtags[i].Should().BeNull();
                 stats.TopHashtagCounts[0].Should().Be(0);
             }
+            stats.TotalHashtags.Should().Be(0);
             stats.TotalTweets.Should().Be(0);
             stats.TweetQueueCount.Should().Be(0);
-
-            // Create an instance with a future date and time
-            expectedDate = expectedDate.AddHours(12345);
-
-            stats = new SampledStreamStats(expectedDate);
-
-            // Check the last updated date
-            stats.LastUpdated.Date.Should().Be(expectedDate.Date);
         }
 
         /// <summary>
