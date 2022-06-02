@@ -54,8 +54,7 @@ namespace SampledStreamApp.Pages
 
             // Set some home page values just for now
             s_stats.Status = "Good";
-            s_stats.TotalHashtags += 200;
-            s_stats.TotalTweets += 100;
+            s_stats.SetBasicFields(s_stats.TotalHashtags + 200, s_stats.TotalTweets + 100, s_stats.TweetQueueCount + 10);
             s_stats.SetCalculatedFields(DateTime.UtcNow.AddMinutes(-1));
 
             _logger.LogInformation("Page get on {DayName} with {TotalTweets} tweets", DayName, s_stats.TotalTweets);

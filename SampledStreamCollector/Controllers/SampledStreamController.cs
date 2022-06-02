@@ -61,8 +61,7 @@ namespace SampledStreamCollector.Controllers
         private SampledStreamStats GetSampledStreamStats()
         {
             // Advance some counts for testing for now
-            _stats.TotalHashtags += 10;
-            _stats.TotalTweets += 5;
+            _stats.SetBasicFields(_stats.TotalHashtags + 10, _stats.TotalTweets + 5, _stats.TweetQueueCount + 2);
 
             // Calculate and set all calculated fields
             _stats.SetCalculatedFields(s_startTime);

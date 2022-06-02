@@ -17,7 +17,35 @@ namespace SampledStreamCollectorTests
         }
 
         /// <summary>
-        /// Test that setting the Tweet Queue count is successful
+        /// Set new values for the basic fields (concurrent safe)
+        /// </summary>
+        /// <param name="totalHashtags"></param>
+        /// <param name="totalTweets"></param>
+        /// <param name="tweetQueueCount"></param>
+        [Theory]
+        [InlineData(0, 0, 0)]
+        [InlineData(1, 0, 0)]
+        [InlineData(0, 1, 0)]
+        [InlineData(0, 0, 1)]
+        [InlineData(10, 20, 0)]
+        [InlineData(10, 0, 20)]
+        [InlineData(20, 30, 40)]
+        public void SetBasicFields_SetValues_ReturnsCorrect(ulong totalHashtags, ulong totalTweets, int tweetQueueCount)
+        {
+            // Create an instance
+            var stats = CreateStatsInstance();
+
+            // Set the basic fields
+            stats.SetBasicFields(totalHashtags, totalTweets, tweetQueueCount);
+
+            // Check the result
+            stats.TotalHashtags.Should().Be(totalHashtags);
+            stats.TotalTweets.Should().Be(totalTweets);
+            stats.TweetQueueCount.Should().Be(tweetQueueCount);
+        }
+
+        /// <summary>
+        /// Test that calculating the calculated fields from the total tweet count is successful
         /// </summary>
         /// <param name="totalTweets">Total number of tweets</param>
         /// <param name="elapsedHours">Number of hours to have elapsed</param>
@@ -44,9 +72,9 @@ namespace SampledStreamCollectorTests
         [InlineData(2000000, 54321, 883, 36)]
         public void SetCalculatedFields_SetValues_ReturnsCorrect(ulong totalTweets, int elapsedHours, ulong expectedDaily, ulong expectedHourly)
         {
-            // Create an instance and set the tweet count
+            // Create an instance and set the total tweet count
             var stats = CreateStatsInstance();
-            stats.TotalTweets = totalTweets;
+            stats.SetBasicFields(0, totalTweets, 0);
 
             // Set a start date from the data allowing a margin of a second for the test
             var startDate = stats.LastUpdated.AddHours(-elapsedHours).AddSeconds(1);
@@ -88,23 +116,24 @@ namespace SampledStreamCollectorTests
         }
 
         /// <summary>
-        /// Test that setting the Tweet Queue count is successful
+        /// Test that setting the Status is successful
         /// </summary>
-        /// <param name="count">The value for the count</param>
+        /// <param name="status">The value for the status</param>
         [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(99)]
-        public void SampledStreamStats_SetQueueCount_Successful(ulong count)
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("Good")]
+        [InlineData("A very bad status")]
+        public void SampledStreamStats_SetQueueCount_Successful(string status)
         {
             // Create an instance
             var stats = CreateStatsInstance();
 
-            // Set the Queue count
-            stats.TweetQueueCount = count;
+            // Set the status
+            stats.Status = status;
 
             // Check the result
-            stats.TweetQueueCount.Should().Be(count);
+            stats.Status.Should().Be(status);
         }
 
         /// <summary>

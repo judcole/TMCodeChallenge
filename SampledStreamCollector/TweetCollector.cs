@@ -92,19 +92,6 @@ namespace SampledStreamCollector
         }
 
         /// <summary>
-        /// Process an incoming tweet
-        /// </summary>
-        /// <param name="tweet">The tweet</param>
-        /// <exception cref="NotImplementedException"></exception>
-        private void ProcessTweet(Tweet tweet)
-        {
-            _stats.TotalHashtags += 2;
-            _stats.TotalTweets++;
-
-            _logger.LogInformation("Processing tweet number {count}", _stats.TotalTweets);
-        }
-
-        /// <summary>
         /// Asynchronously execute the body of the background service
         /// </summary>
         /// <param name="stoppingToken"></param>
@@ -114,6 +101,22 @@ namespace SampledStreamCollector
             _logger.LogInformation("{Type} is now running in the background", nameof(BackgroundWorker));
 
             await BackgroundProcessing(stoppingToken);
+        }
+
+        /// <summary>
+        /// Process an incoming tweet
+        /// </summary>
+        /// <param name="tweet">The tweet</param>
+        /// <returns>True for success</returns>
+        private bool ProcessTweet(Tweet tweet)
+        {
+            bool success = true;
+
+            _stats.SetBasicFields(_stats.TotalHashtags + 2, _stats.TotalTweets + 1, _tweetQueue.GetCount());
+
+            _logger.LogInformation("Processing tweet number {count}", _stats.TotalTweets);
+
+            return success;
         }
 
         /// <summary>
