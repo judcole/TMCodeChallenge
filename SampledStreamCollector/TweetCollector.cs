@@ -207,13 +207,17 @@ namespace SampledStreamCollector
                     {
                         // Get the hashtag without the leading hash
                         var hashtag = match.Value[1..];
+                        //_logger.LogInformation("{string}", hashtag);
 
                         // One more hashtag found
                         hashtagCount++;
 
                         // Increment the counter for this tag
-                        var previousCount = _hashtagDictionary.GetValueOrDefault(match.Value, 0U);
-                        _hashtagDictionary[match.Value] = previousCount + 1;
+                        var newCount = _hashtagDictionary.GetValueOrDefault(match.Value, 0U) + 1;
+                        _hashtagDictionary[match.Value] = newCount;
+
+                        // Update the list of top hashtags with a specified hashtag and count
+                        _stats.UpdateTopHashtags(hashtag, newCount);
                     }
                 }
 

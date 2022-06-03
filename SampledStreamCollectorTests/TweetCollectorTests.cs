@@ -94,7 +94,7 @@ namespace SampledStreamCollector.Tests
         {
             var mockQueue = new Mock<IBackgroundQueue<TweetBlock>>();
             var mockLogger = new Mock<ILogger<TweetCollector>>();
-            var stats = new SampledStreamStats();
+            var stats = new SampledStreamStats(1);
             return new TweetCollector(mockQueue.Object, stats, mockLogger.Object);
         }
 

@@ -80,7 +80,7 @@ namespace SampledStreamCollector.Controllers.Tests
         private static SampledStreamController CreateControllerInstance()
         {
             var mockLogger = new Mock<ILogger<SampledStreamController>>();
-            var stats = new SampledStreamStats();
+            var stats = new SampledStreamStats(1);
             return new SampledStreamController(stats, mockLogger.Object);
         }
     }

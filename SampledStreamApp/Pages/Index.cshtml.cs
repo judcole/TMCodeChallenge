@@ -6,8 +6,11 @@ namespace SampledStreamApp.Pages
     // Class for Index page data model
     public class IndexModel : PageModel
     {
+        // Size of top hashtags list
+        public const int TopHashtagsSize = 10;
+
         // Shared statistics object to provide values for display
-        private static readonly SampledStreamStats s_stats = new();
+        private static readonly SampledStreamStats s_stats = new(TopHashtagsSize);
 
         // Average daily number of tweets received
         public ulong DailyTweets { get { return s_stats.DailyTweets; } }
@@ -28,7 +31,7 @@ namespace SampledStreamApp.Pages
         public ulong TopHashtagCounts (int index) { return s_stats.TopHashtagCounts[index]; }
 
         // Top Hashtags
-        public string TopHashtags(int index) { return s_stats.TopHashtags[index]; }
+        public string? TopHashtags(int index) { return s_stats.TopHashtags[index]; }
 
         // Total hashtag count
         public ulong TotalHashtags { get { return s_stats.TotalHashtags; } }

@@ -5,9 +5,6 @@ namespace SampledStreamCommon
     /// </summary>
     public class SampledStreamStats
     {
-        // Size of the list for the top Hashtags
-        public const int TopHashtagsSize = 10;
-
         // Average daily number of tweets received
         public ulong DailyTweets { get; private set; }
 
@@ -20,12 +17,14 @@ namespace SampledStreamCommon
         // Extra status information
         public string? Status { get; set; }
 
-        // Top 10 Hashtag counts
-        public ulong[] TopHashtagCounts { get; private set; } = new ulong[TopHashtagsSize];
+        // List of top Hashtag counts
+        public ulong[] TopHashtagCounts { get; }
 
-        // Top 10 Hashtags
-        public string[] TopHashtags { get; private set; } = new string[TopHashtagsSize];
+        // List of top 10 hashtags
+        public string?[] TopHashtags { get; }
 
+        // Size of the list for the top Hashtags
+        public int TopHashtagsSize { get; }
         // Total number of hashtags received
         public ulong TotalHashtags { get; private set; }
 
@@ -41,19 +40,25 @@ namespace SampledStreamCommon
         /// <summary>
         /// Construct the SampledStreamStats instance with the current date and time
         /// </summary>
-        public SampledStreamStats()
+        /// <param name="topHashtagsSize">Size of the list for the top Hashtags</param>
+        public SampledStreamStats(int topHashtagsSize)
         {
             // Set the last updated date and time
             LastUpdated = DateTime.UtcNow;
-        }
 
-        /// <summary>
-        /// Set new values for the basic fields (concurrent safe)
-        /// </summary>
-        /// <param name="totalHashtags"></param>
-        /// <param name="totalTweets"></param>
-        /// <param name="tweetQueueCount"></param>
-        public void SetBasicFields(ulong totalHashtags, ulong totalTweets, int tweetQueueCount)
+            // Create the top hashtags list
+            TopHashtagsSize = topHashtagsSize;
+            TopHashtagCounts = new ulong[TopHashtagsSize];
+            TopHashtags = new string[TopHashtagsSize];
+    }
+
+    /// <summary>
+    /// Set new values for the basic fields (concurrent safe)
+    /// </summary>
+    /// <param name="totalHashtags"></param>
+    /// <param name="totalTweets"></param>
+    /// <param name="tweetQueueCount"></param>
+    public void SetBasicFields(ulong totalHashtags, ulong totalTweets, int tweetQueueCount)
         {
             // Play safe and lock the instance while we update it
             lock (_lockObject)
@@ -87,21 +92,47 @@ namespace SampledStreamCommon
             }
         }
 
+        /// <summary>
+        /// Update the list of top hashtags with a specified hashtag and count
+        /// </summary>
+        /// <param name="hashtag">Hashtag to add</param>
+        /// <param name="count">Count of occurences of the hashtag</param>
         public void UpdateTopHashtags(string hashtag, ulong count)
         {
+            // Index of the current hashtag
+            int index;
+
             // Play safe and lock the instance while we update it
             lock (_lockObject)
             {
-                // Find if and where it qualifies to be in the list
-                int index;
-                for (index = TopHashtagsSize - 1; (index > 0) && (TopHashtagCounts[index] < count); index--) ;
-
-                if (index < TopHashtagsSize - 1)
-                {
-                    // Found its slot so we need to shuffle the rest down
-                    for (int i = index; i < TopHashtagsSize - 1; i++)
+                // Find if it is already in the list and if so delete it
+                for (index = 0; index < TopHashtagsSize; index++)
+                    if (TopHashtags[index] == hashtag)
                     {
-                        // Shuffle the previous hashtag down a slot
+                        // Found it so shuffle the rest up
+                        for (int i = index; i < TopHashtagsSize - 1; i++)
+                        {
+                            // Shuffle the lower hashtags up a slot
+                            TopHashtags[i] = TopHashtags[i + 1];
+                            TopHashtagCounts[i] = TopHashtagCounts[i + 1];
+                        }
+                        // Clear the last slot to make sure it can be overwritten
+                        TopHashtags[TopHashtagsSize - 1] = null;
+                        TopHashtagCounts[TopHashtagsSize - 1] = 0;
+
+                        // Done with this part
+                        break;
+                    }
+
+                // Find if and where the hashtag qualifies to be in the list
+                for (index = 0; (index < TopHashtagsSize) && (TopHashtagCounts[index] > count); index++) ;
+
+                if (index < TopHashtagsSize)
+                {
+                    // Found its slot so we need to shuffle the rest down to make room
+                    for (int i = TopHashtagsSize - 2; i >= index; i--)
+                    {
+                        // Shuffle the hashtag down a slot
                         TopHashtags[i + 1] = TopHashtags[i];
                         TopHashtagCounts[i + 1] = TopHashtagCounts[i];
                     }
