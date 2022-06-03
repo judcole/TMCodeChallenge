@@ -53,7 +53,7 @@ namespace SampledStreamCollector.Controllers
             }
             else
             {
-                // Return the stats data with a 200 (Ok)
+                // Return the stats data with an Ok (200) status code
                 return stats;
             }
         }
@@ -64,9 +64,6 @@ namespace SampledStreamCollector.Controllers
         /// <returns>The latest statisics data</returns>
         private SampledStreamStats GetSampledStreamStats()
         {
-            // Advance some counts for testing for now
-            _stats.SetBasicFields(_stats.TotalHashtags + 10, _stats.TotalTweets + 5, _stats.TweetQueueCount + 2);
-
             // Calculate and set all calculated fields
             _stats.SetCalculatedFields(s_startTime);
 
