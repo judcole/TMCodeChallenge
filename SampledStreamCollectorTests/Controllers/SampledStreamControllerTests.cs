@@ -62,7 +62,7 @@ namespace SampledStreamCollector.Controllers.Tests
             if (stats is not null)
             {
                 // Check the basic results
-                stats.TotalTweets.Should().BeGreaterThan(0);
+                stats.TotalTweets.Should().Be(0);
                 stats.Status.Should().BeNull();
 
                 // Check the calculated results
