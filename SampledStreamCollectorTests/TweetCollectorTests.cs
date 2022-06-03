@@ -24,10 +24,11 @@ namespace SampledStreamCollector.Tests
         /// <summary>
         /// Test that the Async operations can be stopped successfully
         /// </summary>
+        ///
+        /// Todo: Improve this test to launch the task first
         [Fact()]
         public void StopAsyncTest()
         {
-            // Todo: Improve this test to launch the task first
             // Create an instance
             var tweetCollector = CreateTweetCollectorInstance();
 
