@@ -13,8 +13,9 @@ This document contains (rudimentary) documentation and links for setting up and 
 - [2. Specification](#2-specification)
 - [3. Folders and Files](#3-folders-and-files)
 - [4. Usage and Testing](#4-usage-and-testing)
-  - [4.1. Automated Unit Tests](#41-automated-unit-tests)
-  - [4.2. Manual Tests](#42-manual-tests)
+  - [4.1. Setup](#41-setup)
+  - [4.2. Manual Testing](#42-manual-testing)
+  - [4.3. Automated Unit Tests](#43-automated-unit-tests)
 - [5. Next Steps / To Do List](#5-next-steps--to-do-list)
   - [5.1. To Do before submission](#51-to-do-before-submission)
   - [5.2. Future features and steps for consideration](#52-future-features-and-steps-for-consideration)
@@ -39,47 +40,54 @@ This document contains (rudimentary) documentation and links for setting up and 
 
 ## 3. Folders and Files
 
-| **Folder or File**     | **Description**                                                                  |
-| ---------------------- | -------------------------------------------------------------------------------- |
-| SampledStreamApp       | Folder containing Web app to display data collected from Twitter sampled stream  |
-| SampledStreamCollector | Folder containing Web app to collect data from Twitter sampled stream            |
-| `.dockerignore`        | List of files that Docker should ignore and not package                          |
-| `.gitattributes`       | List of files and Git attributes that Git should use when performing its actions |
-| `.gitignore`           | List of files that Git should ignore and not track                               |
-| `README.md`            | This documentation file                                                          |
-| `TMCodeChallenge.sln`  | Main Code Challenge Visual Studio Solution file                                  |
+| **Folder or File**          | **Description**                                                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------- |
+| SampledStreamApp            | Folder containing Web app to display Twitter data accumulated provided by our API           |
+| SampledStreamAppTests       | Folder containing Web app unit test suite                                                   |
+| SampledStreamCollector      | Folder containing Web service to collect and process tweets from the Twitter sampled stream |
+| SampledStreamCollectorTests | Folder containing Web service unit test suite                                               |
+| SampledStreamCommon         | Folder containing common classes to be shared between the Web app and the Web service       |
+| `.dockerignore`             | List of files that Docker should ignore and not package                                     |
+| `.gitattributes`            | List of files and Git attributes that Git should use when performing its actions            |
+| `.gitignore`                | List of files that Git should ignore and not track                                          |
+| `README.md`                 | This documentation file                                                                     |
+| `TMCodeChallenge.sln`       | Main Code Challenge Visual Studio Solution file                                             |
 
 ## 4. Usage and Testing
 
-### 4.1. Automated Unit Tests
+### 4.1. Setup
 
-- Load solution `TMCodeChallenge.sln` into Visual Studio
+- Create an environment variable `STREAM_BEARER_TOKEN` with your Twitter API bearer token
+- Load the solution `TMCodeChallenge.sln` into Visual Studio
+
+### 4.2. Manual Testing
+
+- Select project `SampledStreamCollector` for the Web API service to collect tweet data and provide it in an API
+  - Select `IIS Express` as Build Target on drop down (could also select `Docker` if you have Docker Desktop and WSL installed)
+  - Select preferred Web Browser using Build Target drop down if required
+  - Run (`Ctrl+F5`) or Debug (`F5`) the project, which should open a browser with the Swagger API
+    - Refer to the Output window to see log messages such as for the Tweet processing
+    - Use Swagger in the browser to execute the GET call to the API endpoint
+      - Inspect the response body
+      - Execute the API call repeatedly to see increasing numbers in stats
+    - Test the API from the command line `curl -X 'GET' 'https://localhost:44355/api/GetSampledStream' -H 'accept: text/plain'`
+- Select project `SampledStreamApp` for the Web App User Interface that calls the Web API (which must still be running)
+  - Select `IIS Express` as Build Target (could also select `Docker` if you have Docker Desktop and WSL installed)
+  - Select preferred Web Browser using Build Target drop down if required
+  - Run (`Ctrl+F5`) or Debug (`F5`) the project, which should open a browser with the Swagger API
+    - View the statistics
+- Stop debugging (`Shift` `F5`)
+
+### 4.3. Automated Unit Tests
+
 - Select project SampledStreamApp
   - Note that all browser Unit Tests are currently hard coded to use Chrome (see To Do List)
   - Select `IIS Express` as Build Target on drop down (could also select `Docker` if you have Docker Desktop and WSL installed)
-  - Optional:
-    - Start project without Debugging (`Ctrl+F5`) to show default Web page on localhost
+  - Start project without Debugging (`Ctrl+F5`) to show default Web page on localhost
     - If this is not run then the Selenium tests of the results web page will be skipped
+      - Chrome will still load and exit a couple of times, but tests will still succeed
     - If this is run then the Selenium based tests of the results web page will be performed
   - Run all automated tests (`Ctrl+R, A`) or open the tests from Test Explorer (`Ctrl+E, T`) and run selected tests
-
-### 4.2. Manual Tests
-
-- Load solution `TMCodeChallenge.sln` into Visual Studio
-- Select project SampledStreamCollector
-  - Select `IIS Express` as Build Target on drop down (could also select `Docker` if you have Docker Desktop and WSL installed)
-  - Select preferred Web Browser using Build Target drop down
-  - Debug project (`F5`)
-  - Use Swagger to Execute GET call to API
-  - Examine response body
-  - Execute API call repeatedly to see increasing numbers in stats
-  - Test from command line `curl -X 'GET' 'https://localhost:44355/api/GetSampledStream' -H 'accept: text/plain'`
-- Select project SampledStreamApp
-  - Select `IIS Express` as Build Target (could also select `Docker` if you have Docker Desktop and WSL installed)
-  - Select preferred Web Browser using Build Target drop down
-  - Debug project (`F5`)
-  - View stats
-- Stop debugging (`Shift` `F5`)
 
 ## 5. Next Steps / To Do List
 
@@ -91,8 +99,9 @@ This document contains (rudimentary) documentation and links for setting up and 
   - [x] Add strategic exception handling
   - [x] Stats for API result to use shared class
     - [x] Return extra stats
-  - [ ] Create background task to attach to Twitter stream
-    - [ ] Add incoming tweets to concurrent queue with unit tests
+  - [x] Create background task to attach to Twitter stream
+    - [x] Add dummy tweets to concurrent queue
+    - [ ] Parse and add incoming tweets to concurrent queue, with unit tests
   - [x] Create background service to pull incoming tweets from concurrent queue
     - [ ] Loop through tweets extracting hashtags, with unit tests
     - [ ] Add / update totals, with unit tests
@@ -101,7 +110,7 @@ This document contains (rudimentary) documentation and links for setting up and 
   - [x] Replace home page with dummy stream stats
   - [x] Add Test suite project and basic tests
   - [x] Add Index Page Object to simplify testing
-  - [ ] Add strategic exception handling and tests
+  - [x] Add strategic exception handling and tests
   - [x] Stats for API result to use shared class
   - [ ] Call SampleStreamCollector API to retrieve stats
   - [ ] Add combo box for number of seconds for auto-refresh of stats
@@ -115,26 +124,34 @@ This document contains (rudimentary) documentation and links for setting up and 
   - [x] Usage and testing
   - [ ] Update diagrams with latest design
 - [ ] Submission email
-  - [ ] Twitter API key
+  - [ ] Set Twitter API bearer token in `STREAM_BEARER_TOKEN` environment variable
   - [ ] GitHub URL and authentication
 
 ### 5.2. Future features and steps for consideration
 
-| Priority | Category     | Effort | Description                                                                                 |
-| :------: | ------------ | :----: | ------------------------------------------------------------------------------------------- |
-|    H     | Tests        |   M    | Test and document running of tests using `dotnet` command for CI/CD automation              |
-|    M     | Security     |   M    | Add OAUTH to secure Swagger UI                                                              |
-|    M     | Tooling      |   M    | Use gRPC for improving service performance and efficiency                                   |
-|    M     | Tooling      |   M    | Use GraphQL for more advanced APIs                                                          |
-|    M     | Tooling      |   M    | Build a class library for the entity data model for persistence                             |
-|    M     | Tooling      |   S    | Create deployment automation script / Docker compose file for Docker containers             |
-|    M     | Tests        |   S    | Add testing of Blazor rendered pages using bUnit                                            |
-|    M     | Tests        |   M    | Enhance Web UI tests to also run in FireFox and Edge                                        |
-|    M     | Tests        |   M    | Finish setting up unit tests to run in parallel                                             |
-|    L     | Architecture |   M    | Replace worker BackgroundService implementation with a .NET Queue Service                   |
-|    L     | UI           |   S    | Handle any multi-cultural and multi-lingual requirements such as date and number formatting |
-|    L     | Tooling      |   S    | Minimize size of Docker containers by removing unneeded apps and tools                      |
-|    L     | Tests        |   S    | Handle any remaining edge cases of running the date and time tests at exactly midnight          |
+- Use feature branches, merges, and pull requests for multi-user development, rather than just working on `main` branch!
+
+| Priority | Category     | Effort | Description                                                                                                           |
+| :------: | ------------ | :----: | --------------------------------------------------------------------------------------------------------------------- |
+|    H     | Tests        |   M    | Test and document running of tests using `dotnet` command for CI/CD automation                                        |
+|    H     | Architecture |   M    | Improve exception handling for edge cases, network errors etc.                                                        |
+|    M     | Security     |   M    | Add OAUTH to secure Swagger UI                                                                                        |
+|    M     | Tooling      |   M    | Use gRPC for improving service performance and efficiency                                                             |
+|    M     | Tooling      |   M    | Use GraphQL for more advanced APIs                                                                                    |
+|    M     | Tooling      |   M    | Build a class library for the entity data model for persistence                                                       |
+|    M     | Tooling      |   S    | Create deployment automation script / Docker compose file for Docker containers                                       |
+|    M     | Architecture |   M    | Add ability to restart background services and tasks after a serious error                                            |
+|    M     | Performance  |   M    | Create multiple TweetBlock processors that can each run concurrently                                                  |
+|    M     | Performance  |   S    | Batch up (concatenate) incoming tweets before adding them as a block to the queue and then deserialize them as a list |
+|    M     | Architecture |   M    | Move some of the hard coded values and URLs to configuration files                                                    |
+|    M     | Tests        |   S    | Add testing of Blazor rendered pages using bUnit                                                                      |
+|    M     | Tests        |   M    | Add more unit tests (always)                                                                                          |
+|    M     | Tests        |   M    | Enhance Web UI tests to also run in FireFox and Edge                                                                  |
+|    M     | Tests        |   M    | Finish setting up unit tests to run in parallel                                                                       |
+|    L     | Architecture |   M    | Replace worker BackgroundService implementation with a .NET Queue Service                                             |
+|    L     | UI           |   S    | Handle any multi-cultural and multi-lingual requirements such as date and number formatting                           |
+|    L     | Tooling      |   S    | Minimize size of Docker containers by removing unneeded apps and tools                                                |
+|    L     | Tests        |   S    | Handle any remaining edge cases of running the date and time tests at exactly midnight                                |
 
 ## 6. Design diagrams
 

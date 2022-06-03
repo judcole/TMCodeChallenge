@@ -32,7 +32,7 @@ namespace SampledStreamCollector
             // Add other services and singleton values
             services
                 .AddHostedService<TweetCollector>()
-                .AddSingleton<IBackgroundQueue<Tweet>, BackgroundQueue<Tweet>>()
+                .AddSingleton<IBackgroundQueue<TweetBlock>, BackgroundQueue<TweetBlock>>()
                 .AddSingleton<SampledStreamStats>();
         }
 

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Net.Http.Headers;
 using System.Net.Sockets;
+using System.Text.Json;
 using SampledStreamCommon;
 
 // Todo: Replace implementation with a .NET Queue Service https://docs.microsoft.com/en-us/dotnet/core/extensions/queue-service
@@ -27,14 +28,17 @@ namespace SampledStreamCollector
         // HTTP client for accessing the Twitter API
         private readonly HttpClient _httpClient = new();
 
+        // Options and settings for the JSON Serializer
+        private readonly JsonSerializerOptions _jsonOptions = new();
+
         // Application logger
         private readonly ILogger<TweetCollector> _logger;
 
         // Shared total statistics
         private readonly SampledStreamStats _stats;
 
-        // Queue of tweets to process
-        private readonly IBackgroundQueue<Tweet> _tweetQueue;
+        // Queue of tweet blocks to process
+        private readonly IBackgroundQueue<TweetBlock> _tweetQueue;
 
         // Cancellation token source to manage cancellation of the Twitter API read task
         private CancellationTokenSource? _tweetStreamCancellationTokenSource;
@@ -48,7 +52,7 @@ namespace SampledStreamCollector
         /// <param name="queue">Queue of tweets to process</param>
         /// <param name="stats">Shared total statistics</param>
         /// <param name="logger">Application log file</param>
-        public TweetCollector(IBackgroundQueue<Tweet> queue, SampledStreamStats stats, ILogger<TweetCollector> logger)
+        public TweetCollector(IBackgroundQueue<TweetBlock> queue, SampledStreamStats stats, ILogger<TweetCollector> logger)
         {
             // Save the parameters
             _logger = logger;
@@ -85,15 +89,15 @@ namespace SampledStreamCollector
 
                     if (_tweetQueue.GetCount() > 0)
                     {
-                        // Get the next tweet to process
-                        var tweet = _tweetQueue.Dequeue();
+                        // Get the next tweet block to process
+                        var tweetBlock = _tweetQueue.Dequeue();
 
-                        if (tweet is not null)
+                        if (tweetBlock is not null)
                         {
-                            _logger.LogInformation("Processing tweet at: {time}", time);
+                            _logger.LogInformation("Processing tweet block at: {time}", time);
 
-                            // Process the tweet
-                            ProcessTweet(tweet);
+                            // Process the tweet block
+                            ProcessTweetBlockFromQueue(tweetBlock);
                         }
                     }
                     else
@@ -104,12 +108,27 @@ namespace SampledStreamCollector
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogCritical("An error occurred when processing tweets: Exception: {@Exception}", ex);
-                    _stats.Status = $"An error occurred when processing tweets: Exception: {ex}";
+                    _logger.LogCritical("An error occurred when reading tweets: Exception: {@Exception}", ex);
+                    _stats.Status = $"An error occurred when reading tweets: Exception: {ex}";
                 }
             }
 
             _logger.LogInformation("{Type} is now shutting down", nameof(BackgroundWorker));
+        }
+
+        /// <summary>
+        /// Closes the tweet stream started by <see cref="NextTweetStreamAsync"/>. 
+        /// </summary>
+        /// <param name="force">If true, the stream will be closed immediately. With falls the thread had to wait for the next keep-alive signal (every 20 seconds)</param>
+        public void CancelTweetStream(bool force = true)
+        {
+            _tweetStreamCancellationTokenSource?.Dispose();
+
+            if (force)
+            {
+                _tweetStreamReader?.Close();
+                _tweetStreamReader?.Dispose();
+            }
         }
 
         /// <summary>
@@ -145,18 +164,47 @@ namespace SampledStreamCollector
         }
 
         /// <summary>
-        /// Closes the tweet stream started by <see cref="NextTweetStreamAsync"/>. 
+        /// Process an incoming tweet block from the queue
         /// </summary>
-        /// <param name="force">If true, the stream will be closed immediately. With falls the thread had to wait for the next keep-alive signal (every 20 seconds)</param>
-        public void CancelTweetStream(bool force = true)
+        /// <param name="tweetBlock">The tweet block</param>
+        /// <returns>True for success</returns>
+        private bool ProcessTweetBlockFromQueue(TweetBlock tweetBlock)
         {
-            _tweetStreamCancellationTokenSource?.Dispose();
+            // Assume success
+            bool success = true;
 
-            if (force)
+            // Prepare counts for the block
+            ulong tweetCount = 0;
+            ulong hashtagCount = 0;
+
+            try
             {
-                _tweetStreamReader?.Close();
-                _tweetStreamReader?.Dispose();
+                // Deserialize the tweet
+                Tweet? tweet = JsonSerializer.Deserialize<Tweet>(tweetBlock.Contents, _jsonOptions);
+
+                if ((tweet is not null) && (tweet.data is not null) && (tweet.data.text is not null))
+                {
+                    // It looks valid so use it
+                    tweetCount++;
+
+                    if (tweet.data.text.Contains('#'))
+                    {
+                        hashtagCount++;
+                    }
+                }
+
+                // Save the new statistics from the block
+                _stats.SetBasicFields(_stats.TotalHashtags + hashtagCount, _stats.TotalTweets + tweetCount, _tweetQueue.GetCount());
             }
+            catch (Exception ex)
+            {
+                _logger.LogCritical("An error occurred when processing tweets: Exception: {@Exception}", ex);
+                _stats.Status = $"An error occurred when processing tweets: Exception: {ex}";
+            }
+
+            _logger.LogInformation("Have now processed {count} tweets", _stats.TotalTweets);
+
+            return success;
         }
 
         /// <summary>
@@ -166,27 +214,31 @@ namespace SampledStreamCollector
         /// <returns>An async task for the tweet reader</returns>
         private async Task ReadTweetStreamsAsync(string bearerToken, CancellationTokenSource cancellationTokenSource)
         {
+            // Set up the bearer token
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
-            var res = await _httpClient.GetAsync(TwitterApiUrl, HttpCompletionOption.ResponseHeadersRead, cancellationTokenSource.Token);
 
-            _tweetStreamReader = new(await res.Content.ReadAsStreamAsync(cancellationTokenSource.Token));
+            // Initiate the connection with the Twitter stream
+            var result = await _httpClient.GetAsync(TwitterApiUrl, HttpCompletionOption.ResponseHeadersRead, cancellationTokenSource.Token);
+
+            // Set up a stream reader for it
+            _tweetStreamReader = new(await result.Content.ReadAsStreamAsync(cancellationTokenSource.Token));
 
             try
             {
+                // Loop until the end of the stream or cancelled
                 while (!_tweetStreamReader.EndOfStream && !cancellationTokenSource.IsCancellationRequested)
                 {
+                    // Read a line from the Twitter stream
                     var str = await _tweetStreamReader.ReadLineAsync();
 
                     if (string.IsNullOrWhiteSpace(str))
                     {
-                        // A keep-alive string so just ignore it
+                        // It is a keep-alive string so just ignore it
                         continue;
                     }
 
-                    Tweet tweet = new("xxx");
-                    _tweetQueue.Enqueue(tweet);
-
-                    //onNextTweet(ParseData<Tweet>(str).Data);
+                    // Create a new block instance and enqueue it
+                    _tweetQueue.Enqueue(new TweetBlock(str));
                 }
             }
             catch (IOException e)
@@ -199,23 +251,8 @@ namespace SampledStreamCollector
                 }
             }
 
+            // Make sure to cancel the Tweet stream
             CancelTweetStream();
-        }
-
-        /// <summary>
-        /// Process an incoming tweet
-        /// </summary>
-        /// <param name="tweet">The tweet</param>
-        /// <returns>True for success</returns>
-        private bool ProcessTweet(Tweet tweet)
-        {
-            bool success = true;
-
-            _stats.SetBasicFields(_stats.TotalHashtags + 2, _stats.TotalTweets + 1, _tweetQueue.GetCount());
-
-            _logger.LogInformation("Processing tweet number {count}", _stats.TotalTweets);
-
-            return success;
         }
 
         /// <summary>
