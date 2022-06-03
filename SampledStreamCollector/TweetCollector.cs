@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using SampledStreamCommon;
 
 // Todo: Replace implementation with a .NET Queue Service https://docs.microsoft.com/en-us/dotnet/core/extensions/queue-service
@@ -13,17 +14,27 @@ namespace SampledStreamCollector
     /// </summary>
     public class TweetCollector : BackgroundService
     {
+        // Regular expression object to match hashtags
+        public static readonly Regex HashtagRegex = new(HashtagPattern, RegexOptions.IgnoreCase);
+
         // Name of bearer token environment variable
         private const string BearerTokenEnvironmentString = "STREAM_BEARER_TOKEN";
 
         // Message to display and send to the API if the token is missing
         private const string BearerTokenMissingMessage = $"To access the Twitter API please set the {BearerTokenEnvironmentString} environment variable";
 
+        // Todo: This should ideally match international characters as well
+        // Regular expression pattern to match hashtags
+        private const string HashtagPattern = @"\B#\w*[a-zA-Z]+\w*";
+
         // URL of Twitter stream API
         private const string TwitterApiUrl = "https://api.twitter.com/2/tweets/sample/stream";
 
-        // The Twitter stream API authentication bearer token (read from the environment)
+        // Twitter stream API authentication bearer token (read from the environment)
         private readonly string? _bearerToken = Environment.GetEnvironmentVariable(BearerTokenEnvironmentString);
+
+        // Dictionary of all Hashtags and their counts
+        private readonly Dictionary<string, ulong> _hashtagDictionary= new();
 
         // HTTP client for accessing the Twitter API
         private readonly HttpClient _httpClient = new();
@@ -59,6 +70,7 @@ namespace SampledStreamCollector
             _stats = stats;
             _tweetQueue = queue;
         }
+
         /// <summary>
         /// The background processor of queued Tweets
         /// </summary>
@@ -120,7 +132,7 @@ namespace SampledStreamCollector
         /// Closes the tweet stream started by <see cref="NextTweetStreamAsync"/>. 
         /// </summary>
         /// <param name="force">If true, the stream will be closed immediately. With falls the thread had to wait for the next keep-alive signal (every 20 seconds)</param>
-        public void CancelTweetStream(bool force = true)
+        private void CancelTweetStream(bool force = true)
         {
             _tweetStreamCancellationTokenSource?.Dispose();
 
@@ -187,9 +199,21 @@ namespace SampledStreamCollector
                     // It looks valid so use it
                     tweetCount++;
 
-                    if (tweet.data.text.Contains('#'))
+                    // Look for hash tags
+                    var matches = HashtagRegex.Matches(tweet.data.text);
+
+                    // Loop through the results
+                    foreach (Match match in matches)
                     {
+                        // Get the hashtag without the leading hash
+                        var hashtag = match.Value[1..];
+
+                        // One more hashtag found
                         hashtagCount++;
+
+                        // Increment the counter for this tag
+                        var previousCount = _hashtagDictionary.GetValueOrDefault(match.Value, 0U);
+                        _hashtagDictionary[match.Value] = previousCount + 1;
                     }
                 }
 

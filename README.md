@@ -101,11 +101,11 @@ This document contains (rudimentary) documentation and links for setting up and 
     - [x] Return extra stats
   - [x] Create background task to attach to Twitter stream
     - [x] Add dummy tweets to concurrent queue
-    - [ ] Parse and add incoming tweets to concurrent queue, with unit tests
+    - [x] Add incoming tweets to concurrent queue
   - [x] Create background service to pull incoming tweets from concurrent queue
-    - [ ] Loop through tweets extracting hashtags, with unit tests
-    - [ ] Add / update totals, with unit tests
-    - [ ] Add / update top 10 tag list, with unit tests
+    - [x] Loop through tweets extracting hashtags
+    - [x] Add / update totals using a dictionary
+    - [ ] Add / update top 10 tag list
 - [x] Create SampleStreamedApp project from ASP.NET Core Web App template in solution TMCodeChallenge
   - [x] Replace home page with dummy stream stats
   - [x] Add Test suite project and basic tests

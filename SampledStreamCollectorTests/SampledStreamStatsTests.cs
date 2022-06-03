@@ -137,6 +137,75 @@ namespace SampledStreamCollectorTests
         }
 
         /// <summary>
+        /// Test that hashtags and their counts are added to the top hashtags list properly
+        /// </summary>
+        [Fact]
+
+        public void UpdateTopHashtags_Add_Successful()
+        {
+            // Create an instance
+            var stats = CreateStatsInstance();
+
+            const int lastIndex = SampledStreamStats.TopHashtagsSize - 1;
+
+            const string hashtag1 = "abc";
+            const string hashtag2 = "abc1";
+
+            // Add a hashtag and check the result
+            stats.UpdateTopHashtags(hashtag1, 1);
+            CheckTopHashtag(stats, 0, hashtag1, 1);
+            CheckTopHashtag(stats, 1, null, 0);
+            CheckTopHashtag(stats, lastIndex, null, 0);
+
+            // Add it again and check the result
+            stats.UpdateTopHashtags(hashtag1, 2);
+            CheckTopHashtag(stats, 0, hashtag1, 2);
+            CheckTopHashtag(stats, 1, null, 0);
+            CheckTopHashtag(stats, lastIndex, null, 0);
+
+            // Add it again and check the result
+            stats.UpdateTopHashtags(hashtag1, 10);
+            CheckTopHashtag(stats, 0, hashtag1, 10);
+            CheckTopHashtag(stats, 1, null, 0);
+            CheckTopHashtag(stats, lastIndex, null, 0);
+
+            // Add another hashtag and check the result
+            stats.UpdateTopHashtags(hashtag2, 9);
+            CheckTopHashtag(stats, 0, hashtag1, 10);
+            CheckTopHashtag(stats, 1, hashtag2, 9);
+            CheckTopHashtag(stats, 2, null, 0);
+            CheckTopHashtag(stats, lastIndex, null, 0);
+
+            // Add it again and check the result
+            stats.UpdateTopHashtags(hashtag2, 10);
+            CheckTopHashtag(stats, 0, hashtag2, 10);
+            CheckTopHashtag(stats, 1, hashtag1, 10);
+            CheckTopHashtag(stats, 2, null, 0);
+            CheckTopHashtag(stats, lastIndex, null, 0);
+
+            // Add it again and check the result
+            stats.UpdateTopHashtags(hashtag2, 11);
+            CheckTopHashtag(stats, 0, hashtag2, 11);
+            CheckTopHashtag(stats, 1, hashtag1, 10);
+            CheckTopHashtag(stats, 2, null, 0);
+            CheckTopHashtag(stats, lastIndex, null, 0);
+        }
+
+        /// <summary>
+        /// Check that a top hashtags entry matches an expected hashtag and count
+        /// </summary>
+        /// <param name="stats">Statistics instance to check</param>
+        /// <param name="index">Index in top hashtag table</param>
+        /// <param name="hashtag">Expected hashtag</param>
+        /// <param name="count">Expected count</param>
+        private static void CheckTopHashtag(SampledStreamStats stats, int index, string? hashtag, ulong count)
+        {
+            // Check the entry
+            stats.TopHashtags[index].Should().Be(hashtag);
+            stats.TopHashtagCounts[index].Should().Be(count);
+        }
+
+        /// <summary>
         /// Create an instance of the SampledStreamStats class
         /// </summary>
         /// <returns>The new instance</returns>

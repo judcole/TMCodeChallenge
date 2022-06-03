@@ -86,5 +86,31 @@ namespace SampledStreamCommon
                 HourlyTweets = (ulong)(Math.Ceiling((double)TotalTweets) / elapsedHours);
             }
         }
+
+        public void UpdateTopHashtags(string hashtag, ulong count)
+        {
+            // Play safe and lock the instance while we update it
+            lock (_lockObject)
+            {
+                // Find if and where it qualifies to be in the list
+                int index;
+                for (index = TopHashtagsSize - 1; (index > 0) && (TopHashtagCounts[index] < count); index--) ;
+
+                if (index < TopHashtagsSize - 1)
+                {
+                    // Found its slot so we need to shuffle the rest down
+                    for (int i = index; i < TopHashtagsSize - 1; i++)
+                    {
+                        // Shuffle the previous hashtag down a slot
+                        TopHashtags[i + 1] = TopHashtags[i];
+                        TopHashtagCounts[i + 1] = TopHashtagCounts[i];
+                    }
+
+                    // Set the new hashtag value and count in its correct slot
+                    TopHashtags[index] = hashtag;
+                    TopHashtagCounts[index] = count;
+                }
+            }
+        }
     }
 }

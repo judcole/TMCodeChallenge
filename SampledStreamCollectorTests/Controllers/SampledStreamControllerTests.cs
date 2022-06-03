@@ -1,8 +1,8 @@
-﻿using FluentAssertions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using FluentAssertions;
 using Moq;
-using SampledStreamCommon;
 using Xunit.Abstractions;
+using SampledStreamCommon;
 
 namespace SampledStreamCollector.Controllers.Tests
 {
