@@ -1,18 +1,20 @@
-﻿using FluentAssertions;
+﻿using System.Net;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Moq.Protected;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using Xunit.Abstractions;
-
-// Todo: Add testing of Blazor rendered pages using bUnit
-// Todo: Enhance Web UI tests to also run in FireFox and Edge
 
 namespace SampledStreamApp.Pages.Tests
 {
     /// <summary>
     /// Class for Index page model tests
     /// </summary>
+    /// 
+    /// Todo: Add testing of Blazor rendered pages using bUnit
+    /// Todo: Enhance Web UI tests to also run in FireFox and Edge
     public class IndexPageTests : IDisposable
     {
         private readonly IndexPageObject _indexPageObject;
@@ -57,13 +59,25 @@ namespace SampledStreamApp.Pages.Tests
         /// Test that the IndexModel OnGet method returns valid statistics
         /// </summary>
         [Fact()]
-        public void IndexModelOnGet_Request_ReturnStats()
+        public async Task IndexModelOnGet_Request_ReturnStats()
         {
             _testOutputHelper.WriteLine("Starting IndexModelOnGet_Request_ReturnStats");
 
+            // Set up a mocked response from the API
+            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    Content = new StringContent("{\"dailyTweets\":123,\"hourlyTweets\":456,\"totalTweets\":789,\"totalHashtags\":321,\"tweetQueueCount\":654}"),
+                    StatusCode = HttpStatusCode.OK
+                });
+            var mockHttpClient = new HttpClient(mockHttpMessageHandler.Object);
+
+            // Create an intance of the model
             var mockLogger = new Mock<ILogger<IndexModel>>();
             var expectedLastUpdated = DateTime.UtcNow;
-            var indexModel = new IndexModel(mockLogger.Object);
+            var indexModel = new IndexModel(mockHttpClient, mockLogger.Object);
 
             // Check the initial model state
             indexModel.Should().NotBeNull();
@@ -71,17 +85,19 @@ namespace SampledStreamApp.Pages.Tests
             var dateDifference = indexModel.LastUpdated.Subtract(expectedLastUpdated);
             dateDifference.TotalSeconds.Should().BeInRange(-30, 30);
 
-            // Call the method
-            indexModel.OnGet();
+            // Call the OnGet method to populate the model
+            await indexModel.OnGet();
 
             // Check the model state
             indexModel.DayName.Should().Be(DateTime.Now.ToString("dddd"));
             dateDifference = indexModel.LastUpdated.Subtract(expectedLastUpdated);
             dateDifference.TotalSeconds.Should().BeInRange(-30, 30);
-            indexModel.DailyTweets.Should().BeGreaterThan(0);
-            indexModel.HourlyTweets.Should().BeGreaterThan(0);
-            indexModel.Status.Should().Be("Good");
-            indexModel.TotalTweets.Should().BeGreaterThan(0);
+            indexModel.DailyTweets.Should().Be(123);
+            indexModel.HourlyTweets.Should().Be(456);
+            indexModel.Status.Should().Be(null);
+            indexModel.TotalHashtags.Should().Be(321);
+            indexModel.TotalTweets.Should().Be(789);
+            indexModel.TweetQueueCount.Should().Be(654);
 
             _testOutputHelper.WriteLine("IndexModelOnGet_Request_ReturnStats");
         }
@@ -117,6 +133,10 @@ namespace SampledStreamApp.Pages.Tests
             // Check the total tweets count
             var totalTweetsValue = _indexPageObject.TotalTweets.Text;
             Int32.Parse(totalTweetsValue).Should().BeInRange(100, 200);
+
+            // Check the queued tweets count
+            var tweetQueueCountValue = _indexPageObject.TweetQueueCount.Text;
+            Int32.Parse(tweetQueueCountValue).Should().BeInRange(100, 200);
 
             // Check the daily tweets count
             var dailyTweetsValue = _indexPageObject.DailyTweets.Text;
