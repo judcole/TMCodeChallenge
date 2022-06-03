@@ -1,10 +1,12 @@
 # TM Code Challenge Notes
 
-[//]: # ( date: 06/02/22 )
+[//]: # ( date: 06/03/22 )
 
 ## 1. Overview
 
-This document contains (rudimentary) documentation and links for setting up and maintaining a .NET service to access a Twitter stream API and compute various statistics for the random tweets that it provides.
+- This document contains documentation and links for setting up, running, and maintaining:
+  1. A C# .NET 6 service to access a Twitter stream API, compute various statistics for the random tweets that it provides, and provide access to the statistics via an HTTPS API call.
+  2. A C# .NET 6 Razor Web application to display those results on demand by calling the aforementioned API.
 
 ### 1.1. Table of Contents
 
@@ -105,15 +107,14 @@ This document contains (rudimentary) documentation and links for setting up and 
   - [x] Create background service to pull incoming tweets from concurrent queue
     - [x] Loop through tweets extracting hashtags
     - [x] Add / update totals using a dictionary
-    - [ ] Add / update top 10 tag list
+    - [x] Add / update top 10 tag list
 - [x] Create SampleStreamedApp project from ASP.NET Core Web App template in solution TMCodeChallenge
   - [x] Replace home page with dummy stream stats
   - [x] Add Test suite project and basic tests
   - [x] Add Index Page Object to simplify testing
   - [x] Add strategic exception handling and tests
   - [x] Stats for API result to use shared class
-  - [ ] Call SampleStreamCollector API to retrieve stats
-  - [ ] Add combo box for number of seconds for auto-refresh of stats
+  - [x] Call SampleStreamCollector API to retrieve stats
 - [x] Create SampleStreamShared project from shared code library template in solution TMCodeChallenge
   - [x] Shared stats class for API result
     - [x] Total tweets
@@ -123,9 +124,9 @@ This document contains (rudimentary) documentation and links for setting up and 
 - [x] Documentation
   - [x] Usage and testing
   - [ ] Update diagrams with latest design
-- [ ] Submission email
-  - [ ] Set Twitter API bearer token in `STREAM_BEARER_TOKEN` environment variable
-  - [ ] GitHub URL and authentication
+- [x] Submission email
+  - [x] Set Twitter API bearer token in `STREAM_BEARER_TOKEN` environment variable
+  - [x] GitHub URL and authentication (make repo public)
 
 ### 5.2. Future features and steps for consideration
 
@@ -133,8 +134,10 @@ This document contains (rudimentary) documentation and links for setting up and 
 
 | Priority | Category     | Effort | Description                                                                                                           |
 | :------: | ------------ | :----: | --------------------------------------------------------------------------------------------------------------------- |
+|    H     | Security     |   M    | Add OAUTH to secure the main API call                                                                                 |
 |    H     | Tests        |   M    | Test and document running of tests using `dotnet` command for CI/CD automation                                        |
 |    H     | Architecture |   M    | Improve exception handling for edge cases, network errors etc.                                                        |
+|    H     | Architecture |   M    | Switch Web App to a full Razor MVC app for an improved UI                                                             |
 |    M     | Security     |   M    | Add OAUTH to secure Swagger UI                                                                                        |
 |    M     | Tooling      |   M    | Use gRPC for improving service performance and efficiency                                                             |
 |    M     | Tooling      |   M    | Use GraphQL for more advanced APIs                                                                                    |
@@ -148,6 +151,7 @@ This document contains (rudimentary) documentation and links for setting up and 
 |    M     | Tests        |   M    | Add more unit tests (always)                                                                                          |
 |    M     | Tests        |   M    | Enhance Web UI tests to also run in FireFox and Edge                                                                  |
 |    M     | Tests        |   M    | Finish setting up unit tests to run in parallel                                                                       |
+|    M     | UI           |   S    | Add auto refresh of the Web app page and a combo box to control the frequency                                         |
 |    L     | Architecture |   M    | Replace worker BackgroundService implementation with a .NET Queue Service                                             |
 |    L     | UI           |   S    | Handle any multi-cultural and multi-lingual requirements such as date and number formatting                           |
 |    L     | Tooling      |   S    | Minimize size of Docker containers by removing unneeded apps and tools                                                |
@@ -159,22 +163,30 @@ This document contains (rudimentary) documentation and links for setting up and 
 
 ```mermaid
 flowchart LR
-  A("fa:fa-chrome External Application") <-->|Stats| PA
+  A("fa:fa-chrome External Application\ncalling API") <-->|Stats| PA
   B("fa:fa-twitter \nTwitter\nStream API") -->|Stream| CA
   subgraph SampledStreamCollector [.]
-    subgraph Shared
-      SA[Top 10 Hashtags\n+ other Stats]
+    subgraph Shared Data
+      SA[Tweet queue]
+      SB[Top 10 Hashtags]
+      SC[Other Stats]
     end
     subgraph Collector
-      CA(Collector) -->|Tweets\nand\nHashtags| CB[[Increment\nHashtag\nCounts]]
-      CB <-->|AddOrUpdate| BA["All Hashtag Counts\n(ConcurrentDictionary)"]
-      CB -->|Hashtag\n and Count| CC{In\nTop 10}
-      CC -->|Yes| CD[[Replace\nin Top 10]]
-      CD --> SA
-      SA -.->|read| CC
+      CA(Tweet\nCollector) -->|Tweet data| SA
+    end
+    subgraph Updater
+      SA -->|Tweet data| UA[[Parse out tweets]]
+      UA --> UB[[Increment\nHashtag\nCounts]]
+      UB <-->|AddOrUpdate| BA["All Hashtag Counts\n(ConcurrentDictionary)"]
+      UB -->|Hashtag\n and Count| UC{Hashtag\nIn\nTop 10}
+      UB --> SC
+      UC -->|Yes| UD[[Replace\nin Top 10]]
+      UD --> SB
+      SB -.->|read| UC
     end
     subgraph Provider
-      SA -.->|read| PA[GetStreamStats]
+      SB -.->|read| PA[GetStreamStats\nAPI call]
+      SC -.->|read| PA
     end
   end
 ```
@@ -182,7 +194,6 @@ flowchart LR
 ### 6.2. SampledStream Web Application
 
 ```mermaid
-%%{init: {'theme': 'default', "flowchart" : { "diagramPadding": "8", "nodeSpacing": "100", "rankSpacing": "100" } } }%%
 flowchart LR
   A("fa:fa-firefox Web Browser") <--> AA
   subgraph SampledStreamApp
