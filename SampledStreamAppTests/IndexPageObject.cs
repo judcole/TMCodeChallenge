@@ -38,6 +38,9 @@ namespace SampledStreamApp.Pages.Tests
         // Total tweet count
         public IWebElement TotalTweets => _webDriver.FindElement(By.Id("total-tweets"));
 
+        // Tweet queue count
+        public IWebElement TweetQueueCount => _webDriver.FindElement(By.Id("queued-tweets"));
+
         // Construct the page instance
         public IndexPageObject(IWebDriver webDriver)
         {
