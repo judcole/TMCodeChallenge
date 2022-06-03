@@ -5,13 +5,13 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using SampledStreamCommon;
 
-// Todo: Replace implementation with a .NET Queue Service https://docs.microsoft.com/en-us/dotnet/core/extensions/queue-service
-
 namespace SampledStreamCollector
 {
     /// <summary>
     /// Class to collect tweet data from the Twitter Sampled Stream API
     /// </summary>
+    /// 
+    /// Todo: Replace implementation with a .NET Queue Service https://docs.microsoft.com/en-us/dotnet/core/extensions/queue-service
     public class TweetCollector : BackgroundService
     {
         // Regular expression object to match hashtags
@@ -269,10 +269,10 @@ namespace SampledStreamCollector
                     _tweetQueue.Enqueue(new TweetBlock(str));
                 }
             }
-            catch (IOException e)
+            catch (IOException ex)
             {
                 // Check for a connection aborted socket exception
-                if (!((e.InnerException is SocketException se) && (se.SocketErrorCode == SocketError.ConnectionAborted)))
+                if (!((ex.InnerException is SocketException se) && (se.SocketErrorCode == SocketError.ConnectionAborted)))
                 {
                     // Not a connection aborted socket exception so rethrow it
                     throw;
