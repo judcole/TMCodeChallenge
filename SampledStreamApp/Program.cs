@@ -6,6 +6,9 @@ try
     // Add services to the container.
     builder.Services.AddRazorPages();
 
+    // Add an HTTP client to the container
+    builder.Services.AddHttpClient();
+
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
