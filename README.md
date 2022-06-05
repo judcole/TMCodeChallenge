@@ -1,6 +1,6 @@
 # TM Code Challenge Notes
 
-[//]: # ( date: 06/03/22 )
+[//]: # ( date: 06/05/22 )
 
 ## 1. Overview
 
@@ -123,7 +123,7 @@
     - [x] Top 10 tags and counts
 - [x] Documentation
   - [x] Usage and testing
-  - [ ] Update diagrams with latest design
+  - [x] Update diagrams with latest design
 - [x] Submission email
   - [x] Set Twitter API bearer token in `STREAM_BEARER_TOKEN` environment variable
   - [x] GitHub URL and authentication (make repo public)
@@ -134,6 +134,8 @@
 
 | Priority | Category     | Effort | Description                                                                                                           |
 | :------: | ------------ | :----: | --------------------------------------------------------------------------------------------------------------------- |
+|    H     | Architecture |   S    | Modify Shared Stats object to have a 'build stats record' method that locks the object and creates an instance        |
+|          |              |        | of the simplified Stats record (already used by the Web app) that can be returned by the GetStats API                 |
 |    H     | Security     |   M    | Add OAUTH to secure the main API call                                                                                 |
 |    H     | Tests        |   M    | Test and document running of tests using `dotnet` command for CI/CD automation                                        |
 |    H     | Architecture |   M    | Improve exception handling for edge cases, network errors etc.                                                        |
@@ -144,6 +146,9 @@
 |    M     | Tooling      |   M    | Build a class library for the entity data model for persistence                                                       |
 |    M     | Tooling      |   S    | Create deployment automation script / Docker compose file for Docker containers                                       |
 |    M     | Architecture |   M    | Add ability to restart background services and tasks after a serious error                                            |
+|    M     | Performance  |   S    | SampledStreamStats.UpdateTopHashtags method to add to the top 10 table could:                                         |
+|          |              |        | a) Check that the count is greater than the count of the lowest entry before doing any other checks                   |
+|          |              |        | b) work upwards from the lowest count rather than downwards from the highest count                                    |
 |    M     | Performance  |   M    | Create multiple TweetBlock processors that can each run concurrently                                                  |
 |    M     | Performance  |   S    | Batch up (concatenate) incoming tweets before adding them as a block to the queue and then deserialize them as a list |
 |    M     | Architecture |   M    | Move some of the hard coded values and URLs to configuration files                                                    |
@@ -210,7 +215,7 @@ flowchart LR
 - [Apply for API access](https://developer.twitter.com/en/apply-for-access)
 
   ```sh
-  # Sample results
+  # Sample results with example values from Twitter API documentation
   API Key: QAktM6W6DF6F7XXXXXX
   API Key Secret: AJX560A2Omgwyjr6Mml2esedujnZLHXXXXXX
   Bearer Token: AAAAAAAAAAAAAAAAAAAAAL9v6AAAAAAA99t03huuqRYg0mpYAAFRbPR3XXXXXXX
@@ -219,7 +224,7 @@ flowchart LR
 - Test from command prompt
 
   ```powershell
-  # Set bearer token for testing access
+  # Set bearer token for testing access (example value from Twitter API documentation)
   $env:BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAL9v6AAAAAAA99t03huuqRYg0mpYAAFRbPR3XXXXXXX'
   # Test API access
   curl -X GET "https://api.twitter.com/2/tweets/sample/stream" -H "Authorization: Bearer ${env:BEARER_TOKEN}"
@@ -233,7 +238,7 @@ flowchart LR
 - Set up consumer keys and tokens in Environment
 
   ```sh
-  # Example key values
+  # Example values from Twitter API documentation
   consumer_key: `QAktM6W6DF6F7XXXXXX`
   consumer_secret: `AJX560A2Omgwyjr6Mml2esedujnZLHXXXXXX`
   access_token: `1995XXXXX-0NGqVhk3s96IX6SgT3H2bbjOPjcyQXXXXXXX`
