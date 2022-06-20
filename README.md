@@ -1,6 +1,6 @@
 # TM Code Challenge Notes
 
-[//]: # ( date: 06/05/22 )
+[//]: # ( date: 06/20/22 )
 
 ## 1. Overview
 
@@ -26,7 +26,7 @@
   - [6.2. SampledStream Web Application](#62-sampledstream-web-application)
 - [7. Twitter APIs](#7-twitter-apis)
   - [7.1. Using Postman to access Twitter APIs](#71-using-postman-to-access-twitter-apis)
-  - [7.2. Run / Debug the solution projects](#72-run--debug-the-solution-projects)
+  - [7.2. Run the solution projects under Docker](#72-run-the-solution-projects-under-docker)
 - [8. References](#8-references)
 
 [//]: # ( spell-checker: ignore blazor choco dockerignore plantuml sampledstream )
@@ -250,7 +250,18 @@ flowchart LR
 - Response body will be empty because Twitter does not fill streams  for Postman
 - Use Code | cURL to view the command, then copy and run it
 
-### 7.2. Run / Debug the solution projects
+### 7.2. Run the solution projects under Docker
+
+```sh
+# Set up the Twitter API token
+export STREAM_BEARER_TOKEN=<token>
+# Run the collector container image using the token
+docker run -e "STREAM_BEARER_TOKEN" -d <collector image id>
+# Show the latest log messages to monitor its progress
+docker container logs <container id>
+# Run a shell in the container for troubleshooting
+docker container exec -i <container id> bash
+```
 
 ## 8. References
 
