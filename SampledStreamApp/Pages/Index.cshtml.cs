@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Sockets;
-using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace SampledStreamApp.Pages
@@ -26,7 +26,17 @@ namespace SampledStreamApp.Pages
     }
 #pragma warning restore IDE1006 // Restore warnings for unconventional field names
 
-    // Class for Index page data model
+    /// <summary>
+    /// Statistics Json serialization context class for performance and to allow executable trimming
+    /// </summary>
+    [JsonSerializable(typeof(RawStats))]
+    internal partial class RawStatsJsonContext : JsonSerializerContext
+    {
+    }
+
+    /// <summary>
+    /// Class for Index page data model 
+    /// </summary>
     public class IndexModel : PageModel
     {
         // Statistics object to provide values for display
@@ -67,9 +77,6 @@ namespace SampledStreamApp.Pages
 
         // URL of the statistics API
         private const string SampledStreamStatsApiUrl = "https://localhost:44355/api/GetSampledStream";
-
-        // Options and settings for the JSON Serializer
-        private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
         // HTTP client for accessing the Web API
         private readonly HttpClient _httpClient;
@@ -124,8 +131,8 @@ namespace SampledStreamApp.Pages
                 HttpResponseMessage response = await _httpClient.GetAsync(SampledStreamStatsApiUrl);
                 if (response.IsSuccessStatusCode)
                 {
-                    // Get the JSON response and parse it into an object
-                    stats = await response.Content.ReadFromJsonAsync<RawStats>(_jsonOptions);
+                    // Get the JSON response and parse it into a stats object
+                    stats = await response.Content.ReadFromJsonAsync<RawStats>(RawStatsJsonContext.Default.RawStats);
 
                     if (stats is not null)
                     {

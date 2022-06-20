@@ -39,9 +39,6 @@ namespace SampledStreamCollector
         // HTTP client for accessing the Twitter API
         private readonly HttpClient _httpClient = new();
 
-        // Options and settings for the JSON Serializer
-        private readonly JsonSerializerOptions _jsonOptions = new();
-
         // Application logger
         private readonly ILogger<TweetCollector> _logger;
 
@@ -192,7 +189,7 @@ namespace SampledStreamCollector
             try
             {
                 // Deserialize the tweet
-                Tweet? tweet = JsonSerializer.Deserialize<Tweet>(tweetBlock.Contents, _jsonOptions);
+                Tweet? tweet = JsonSerializer.Deserialize<Tweet>(tweetBlock.Contents, TweetJsonContext.Default.Tweet);
 
                 if ((tweet is not null) && (tweet.data is not null) && (tweet.data.text is not null))
                 {
