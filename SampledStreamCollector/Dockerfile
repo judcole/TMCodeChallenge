@@ -1,11 +1,11 @@
-#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+# Optimized based on https://www.thorsten-hans.com/how-to-build-smaller-and-secure-docker-images-for-net5/
+# Trimming is not yet working because some Microsoft Assemblies use the older JSON serialization that does not support trimming
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine AS base
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS build
 WORKDIR /src
 COPY ["SampledStreamCollector/SampledStreamCollector.csproj", "SampledStreamCollector/"]
 RUN dotnet restore "SampledStreamCollector/SampledStreamCollector.csproj"
@@ -14,9 +14,26 @@ WORKDIR "/src/SampledStreamCollector"
 RUN dotnet build "SampledStreamCollector.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "SampledStreamCollector.csproj" -c Release -o /app/publish
+RUN dotnet publish "SampledStreamCollector.csproj" -c Release -o /app/publish \
+    --runtime alpine-x64 \
+    --self-contained true \
+    /p:PublishSingleFile=true \
+    /p:PublishTrimmed=false
 
-FROM base AS final
+#    /p:TrimmerSingleWarn=false
+#    /p:TrimmerDefaultAction=link
+
+FROM mcr.microsoft.com/dotnet/runtime-deps:6.0-alpine AS final
+
+RUN adduser --disabled-password \
+  --home /app \
+  --gecos '' dotnetuser && chown -R dotnetuser /app
+
+USER dotnetuser
+
 WORKDIR /app
+
+EXPOSE 5000
+
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SampledStreamCollector.dll"]
+ENTRYPOINT ["./SampledStreamCollector", "--urls", "http://localhost:5000"]
